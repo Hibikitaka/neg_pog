@@ -1,0 +1,7 @@
+# python==3.10.11
+muselsl==2.1.0
+scipy
+matplotlib==3.7.0
+pyqt5==5.15.7
+vispy==0.13.0
+mne==0.18.0

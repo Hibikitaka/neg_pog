@@ -1,0 +1,26 @@
+URL: https://news.yahoo.co.jp/articles/1397a614164a12536a6d3b4b097fa90a5d998c98
+Category: it
+
+写真：AKIBA PC Hotline!
+ASUSTORの5GbE LAN×2搭載NAS「LOCKERSTOR Gen2+」シリーズがアユートから発売された。
+
+【この記事に関する別の画像を見る】
+
+　製品は2ベイの「LOCKERSTOR 2 Gen2+」（型番：AS6702T v2）、4ベイの「LOCKERSTOR 4 Gen2+」（型番：AS6704T v2）、6ベイの「LOCKERSTOR 6 Gen2+」（型番：AS6706T v2）の3つ。
+
+　Amazon.co.jpの価格は順に85,900円、111,500円、147,000円。
+
+■ Celeron N5105や5GbE LANポートを搭載したクリエイターやビジネス向けNAS
+
+　LOCKERSTOR Gen2+シリーズはCeleron N5105プロセッサーを搭載したNAS。2～6つのドライブベイのほか、4つのM.2ドライブスロットが装備されており、ドライブは別途用意する。
+
+　2022年5月発売のパワーユーザー/ビジネス向けNAS「LOCKERSTOR Gen2」シリーズのアップグレード品という位置づけ。ネットワークポートを2.5GbE LAN×2から5GbE LAN×2に変更し、USBポート（USB 2.0×1）を追加した。
+
+　対応ドライブは3.5インチSATA HDD、2.5インチSATA HDD、2.5インチSATA SSD、M.2 2280 NVMe。M.2スロットはキャッシュ用かストレージ用、またはその両方として利用できるとのこと。
+
+　外部ポートはUSB 3.2 Gen2 Type-A×2、USB 2.0 Type-A×1、5GbE LAN×2、HDMI 2.0b×1で、LOCKERSTOR 4 Gen2+とLOCKERSTOR 6 Gen2+は10GbE LANカード×1が搭載可能（PCIe拡張スロット）。
+
+　搭載メモリーはLOCKERSTOR 2 Gen2+とLOCKERSTOR 4 Gen2+が4GB SO-DIMM DDR4×1、LOCKERSTOR 6 Gen2+が8GB SO-DIMM DDR4×1。増設上限は最大16GB（8GB×2）。
+
+　製品寸法（高さ×幅×奥行き）はLOCKERSTOR 2 Gen2+が163.5×108×230mm、LOCKERSTOR 4 Gen2+が185.5×170×230mm、LOCKERSTOR 6 Gen2+が185.5×233×230mm。重量はLOCKERSTOR 2 Gen2+が2.00kg、LOCKERSTOR 4 Gen2+が2.94kg、LOCKERSTOR 6 Gen2+が4.40kg。
+AKIBA PC Hotline!,AKIBA PC Hotline!編集部

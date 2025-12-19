@@ -1,0 +1,12 @@
+URL: https://news.yahoo.co.jp/articles/b67173f0fceacdeebe41ac5db8f3be97356ca275
+Category: it
+
+「mouse SHシリーズ」
+マウスコンピューターは12月10日、スリムデスクトップPC「mouse SH」シリーズのラインアップに第14世代Coreプロセッサ搭載モデルを追加、本日販売を開始する。
+
+【画像】第14世代Coreプロセッサ搭載モデルが追加されたmouse SHシリーズ
+
+　本体幅99mmの省スペース型筐体を採用するデスクトップPCで、Intel B760チップセット搭載マザーボードを備え14世代Coreプロセッサの搭載に対応しているのが特徴だ。
+
+　製品ラインアップは、Core i3-14100とメモリ8GB/256GB SSDを搭載する「mouse SH-I3U01」、Core i5-14400とメモリ8GB/256GB SSDを搭載する「mouse SH-I5U01」、Core i7-14700とメモリ8GB/256GB SSDを搭載する「mouse SH-I7U01」の3構成を取りそろえた。価格はそれぞれ8万9800円、10万4800円、12万9800円だ（税込み）。
+ITmedia PC USER

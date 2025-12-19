@@ -1,0 +1,14 @@
+URL: https://news.yahoo.co.jp/articles/a1cb85e4f43a9cd889569ff7a14417bad912417d
+Category: it
+
+写真：PC Watch
+キオクシアは、PCIe 5.0に対応したNVMe SSD「EXCERIA PRO G2 SSD」シリーズおよび「EXCERIA G3 SSD」シリーズを2026年1月に発売する。
+
+【画像】EXCERIA G3 SSD
+
+　EXCERIA PRO G2 SSシリーズは生成AI活用、ゲーミング、クリエイティブ制作に求められる高負荷ワークロードに対応するモデルで、同社の個人向けSSDラインナップでは最速。容量は1TB/2TB/4TBで、シーケンシャルリード速度は最大14,900MB/s、シーケンシャルライト速度は最大13,700MB/s。ヒートスプレッダ入りラベル採用で冷却性能向上を図っているのも特徴。
+
+　EXCERIA G3 SSDシリーズはエントリーのPCIe 5.0対応SSDで、容量は1TB/2TBで、2026年中に4TBモデルもラインナップに追加予定。シーケンシャルリード速度は最大10,000MB/s、シーケンシャルライト速度は最大9,600MB/s。
+
+　いずれもBiCS FLASH技術を採用し、管理ソフトとして「SSD Utility」をサポートする。フォームファクタはM.2 2280。
+PC Watch,劉 尭

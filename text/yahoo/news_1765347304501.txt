@@ -1,0 +1,18 @@
+URL: https://news.yahoo.co.jp/articles/49780c84ee2fe6629bb304ea192e0ea168747e66
+Category: it
+
+写真：PC Watch
+FRONTIERは、CPUにRyzen AI 7 350、GPUにGeForce RTX 5050 Laptop GPUを搭載した16型ゲーミングノート「AVN」シリーズを発売した。
+
+　構成例として、「FRAVN735/A」は、メモリに16GB、ストレージに1TB NVMe SSDを搭載し、価格は20万9,800円。
+
+　「FRAVN735/B」は、メモリに32GB、ストレージに1TB NVMe SSDを搭載し、価格は21万4,800円。
+
+　「FRAVN735/C」は、メモリに32GB、ストレージに2TB NVMe SSDを搭載し、価格は22万4,800円。
+
+　そのほかの仕様は共通で、ディスプレイに1,920×1,200ドット/165Hz表示対応16型非光沢液晶、OSにWindows 11 Homeなどを搭載する。
+
+　インターフェイスは、USB 3.2 Gen 2 Type-C(DisplayPort Alt Mode対応)、USB 3.2 Gen 2、USB 3.2 Gen 1、USB 2.0、HDMI出力、Mini DispayPort、Gigabit Ethernet、Wi-Fi 7、Bluetooth 5.4、92万画素Webカメラ、音声入出力などを備える。
+
+　バッテリは53.35Whリチウムポリマー。本体サイズは約356.9×259×27.05mm、重量は約2.3kg。
+PC Watch,劉 尭
