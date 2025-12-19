@@ -1,105 +1,114 @@
-# news_sc_txt.py
+# multi_news_scraper_large.py
 import os
 import time
+import concurrent.futures
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
 
-# 保存先ディレクトリ
-SAVE_DIR = "text/yahoo/"
+SAVE_DIR = "text/multi_news/"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-# Yahooニュースカテゴリ
-CATEGORIES = {
-    "top": "https://news.yahoo.co.jp/",
-    "domestic": "https://news.yahoo.co.jp/categories/domestic",
-    "world": "https://news.yahoo.co.jp/categories/world",
-    "business": "https://news.yahoo.co.jp/categories/business",
-    "it": "https://news.yahoo.co.jp/categories/it"
+# 対象サイトとページネーションURLのテンプレート
+SITES = {
+    "yahoo_top": {
+        "base_url": "https://news.yahoo.co.jp/pickup/past?page={page}",
+        "max_page": 500  # 過去記事ページ数
+    },
+    "itmedia": {
+        "base_url": "https://www.itmedia.co.jp/news/articles/{year}/{month}/{page}.html",
+        "max_page": 300
+    },
+    "cnet": {
+        "base_url": "https://japan.cnet.com/archive/{page}/",
+        "max_page": 300
+    }
 }
 
-# Selenium初期化
 def init_driver():
     options = Options()
-    options.add_argument("--headless")  # ヘッドレスモード
+    options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     service = Service()
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
-# 記事本文取得
+def get_article_urls(driver, url):
+    try:
+        driver.get(url)
+        time.sleep(0.5)
+        links = driver.find_elements("css selector", "a")
+        urls = []
+        for a in links:
+            href = a.get_attribute("href")
+            if href and "article" in href:  # 各サイトごとに条件調整
+                urls.append(href)
+        return list(set(urls))
+    except WebDriverException:
+        return []
+
 def get_article_text(driver, url):
     try:
         driver.get(url)
-        time.sleep(1)
-        selectors = [
-            "div.article_body p",
-            "div.article_body.highLightSearchTarget p",
-            "article p"
-        ]
+        time.sleep(0.5)
+        selectors = ["div.article_body p", "article p"]
         for sel in selectors:
             elems = driver.find_elements("css selector", sel)
             if elems:
                 text = "\n".join([e.text for e in elems if e.text.strip()])
                 if text:
                     return text
-        print(f"本文抽出失敗（本文セレクタ不一致）: {url}")
         return None
-    except WebDriverException as e:
-        print(f"本文取得失敗: {url} ({e})")
+    except WebDriverException:
         return None
 
-# カテゴリ記事URL取得
-def get_article_urls(driver, category_url):
-    try:
-        driver.get(category_url)
-        time.sleep(1)
-        links = driver.find_elements("css selector", "a")
-        urls = []
-        for a in links:
-            href = a.get_attribute("href")
-            if href and "/articles/" in href:
-                urls.append(href)
-        return list(set(urls))  # 重複除去
-    except WebDriverException as e:
-        print(f"記事URL取得失敗: {category_url} ({e})")
-        return []
+def save_article(category, url, text):
+    timestamp = int(time.time() * 1000)
+    filename = f"{category}_{timestamp}.txt"
+    filepath = os.path.join(SAVE_DIR, filename)
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(f"URL: {url}\nCategory: {category}\n\n{text}")
+    return filepath
 
-# メイン処理
+def process_url(driver, category, url):
+    text = get_article_text(driver, url)
+    if text:
+        return save_article(category, url, text)
+    return None
+
 def main():
-    print("=== Yahooニューススクレイピング開始 ===")
+    print("=== ニュース記事収集開始 ===")
     driver = init_driver()
-    all_urls = []
-    try:
-        # カテゴリ別にURL取得
-        for cat, url in CATEGORIES.items():
-            print(f"カテゴリ {cat}: {url}")
-            urls = get_article_urls(driver, url)
-            print(f" → {len(urls)}件取得")
-            all_urls.extend([(cat, u) for u in urls])
-        all_urls = list(set(all_urls))  # 重複除去
-        print(f"総取得記事数: {len(all_urls)} 件")
+    all_urls = set()
 
-        # 記事ごとに本文取得 & TXT保存
-        for idx, (cat, url) in enumerate(all_urls, 1):
-            print(f"[{idx}/{len(all_urls)}] {url}")
-            text = get_article_text(driver, url)
-            if not text:
-                print(" → 本文取得失敗、スキップ")
-                continue
-            filename = f"news_{int(time.time()*1000)}.txt"
-            filepath = os.path.join(SAVE_DIR, filename)
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(f"URL: {url}\n")
-                f.write(f"Category: {cat}\n\n")
-                f.write(text)
-            print(f"保存: {filepath}")
+    try:
+        # サイトごとにページネーションを回してURL取得
+        for site, info in SITES.items():
+            print(f"サイト {site} の記事URL取得中...")
+            base_url = info["base_url"]
+            max_page = info["max_page"]
+            for page in range(1, max_page + 1):
+                url = base_url.format(page=page, year=2025, month="12")
+                urls = get_article_urls(driver, url)
+                all_urls.update([(site, u) for u in urls])
+                if page % 50 == 0:
+                    print(f" → {len(all_urls)} 件取得中 (page {page})")
+        all_urls = list(all_urls)
+        print(f"総取得記事数（重複除去後）: {len(all_urls)} 件")
+
+        # 並列で本文取得 & 保存
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(process_url, driver, site, url) for site, url in all_urls]
+            for idx, f in enumerate(concurrent.futures.as_completed(futures), 1):
+                result = f.result()
+                if result:
+                    print(f"[{idx}/{len(futures)}] 保存: {result}")
 
     finally:
         driver.quit()
-        print("=== 終了 ===")
+        print("=== 収集終了 ===")
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 import os
 import random
-import statistics
+from collections import defaultdict
 import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score
 import MeCab
@@ -33,152 +33,169 @@ def get_words(text):
         features = node.feature.split(",")
         pos = features[0]
         base = features[6] if len(features) > 6 else "*"
-        if pos in ["名詞", "形容詞", "動詞"]:
+        if pos in ["名詞", "形容詞", "動詞", "副詞"]:
             words.append(base if base != "*" else node.surface)
         node = node.next
-    return words if words else ["未解析"]
+    return words
 
 # =========================================================
-# 3. ニュース読み込み（pos / neg 同数）
+# 3. 辞書語優先抽出（辞書語がない場合は全文単語）
 # =========================================================
-def load_news_balanced(root, limit=None, seed=42):
+def extract_dict_words(text, dic):
+    words = get_words(text)
+    hits = [w for w in words if w in dic]
+    return hits if hits else words
+
+# =========================================================
+# 4. ニュース読み込み
+# =========================================================
+def load_news_from_files(root, seed=42):
     random.seed(seed)
     data = []
-
     for label, folder in [("__label__ポジ", "pos"), ("__label__ネガ", "neg")]:
         path = os.path.join(root, folder)
-        for filename in sorted(os.listdir(path)):
-            full = os.path.join(path, filename)
-            if not os.path.isfile(full):
-                continue
-            with open(full, encoding="utf-8") as f:
-                text = f.read().strip()
-                if len(text) > 10:
-                    data.append((text, label))
-
-    random.shuffle(data)
-
+        count = 0
+        for dirpath, _, filenames in os.walk(path):
+            for fn in sorted(filenames):
+                full = os.path.join(dirpath, fn)
+                if not os.path.isfile(full):
+                    continue
+                try:
+                    with open(full, encoding="utf-8") as f:
+                        articles = [line.strip() for line in f if line.strip()]
+                        for article in articles:
+                            if len(article) > 10:
+                                data.append((article, label))
+                                count += 1
+                except UnicodeDecodeError:
+                    continue
+        print(f"{folder} 件数={count}")
     pos = [d for d in data if d[1] == "__label__ポジ"]
     neg = [d for d in data if d[1] == "__label__ネガ"]
     n = min(len(pos), len(neg))
-
     data = pos[:n] + neg[:n]
     random.shuffle(data)
-
-    if limit:
-        data = data[:limit]
-
     texts, labels = zip(*data)
     return list(texts), list(labels)
 
 # =========================================================
-# 4. train / test 分割
+# 5. stratified train/test split
 # =========================================================
-def train_test_split(texts, labels, test_ratio=0.2):
-    split = int(len(texts) * (1 - test_ratio))
-    return (
-        texts[:split], labels[:split],
-        texts[split:], labels[split:]
-    )
+def stratified_split(texts, labels, test_ratio=0.2, seed=42):
+    random.seed(seed)
+    buckets = defaultdict(list)
+    for t, l in zip(texts, labels):
+        buckets[l].append(t)
+
+    tr_x, tr_y, te_x, te_y = [], [], [], []
+    for label, items in buckets.items():
+        random.shuffle(items)
+        split = int(len(items) * (1 - test_ratio))
+        tr_x.extend(items[:split])
+        tr_y.extend([label] * split)
+        te_x.extend(items[split:])
+        te_y.extend([label] * (len(items) - split))
+    return tr_x, tr_y, te_x, te_y
 
 # =========================================================
-# 5. 辞書方式予測
+# 6. 辞書方式改善版
 # =========================================================
-def predict_dict(texts, dic, threshold):
+def predict_dict_improved(texts, dic, threshold=0.0):
     preds = []
     for text in texts:
         words = get_words(text)
-        hit = [dic[w] for w in words if w in dic]
-        score = sum(hit) / len(hit) if hit else 0
-        preds.append("__label__ポジ" if score >= threshold else "__label__ネガ")
+        if not words:
+            preds.append("__label__ネガ")
+            continue
+        dict_scores = [dic.get(w, 0.0) for w in words]
+        score = sum(dict_scores) / len(words)  # 平均スコア
+        preds.append("__label__ポジ" if score > threshold else "__label__ネガ")
     return preds
 
 # =========================================================
-# 6. fastText用データ作成（改行除去）
+# 7. fastText 用ファイル作成
 # =========================================================
-def make_fasttext_file(texts, labels, path):
+def make_fasttext_file(texts, labels, dic, path):
     with open(path, "w", encoding="utf-8") as f:
         for t, l in zip(texts, labels):
-            t = t.replace("\n", " ")
-            f.write(f"{l} {t}\n")
+            toks = extract_dict_words(t, dic)
+            if not toks:
+                toks = get_words(t)
+            f.write(f"{l} {' '.join(toks)}\n")
 
 # =========================================================
-# 7. 実験本体
+# 8. 件数ごとの実験
 # =========================================================
-def run_full_experiment(dic, news_root, counts_list):
-    dict_f1 = []
-    ft_f1 = []
+def run_counts_experiment(dic, news_root, counts_list):
+    dict_f1_list = []
+    ft_f1_list = []
+
+    texts, labels = load_news_from_files(news_root)
 
     for count in counts_list:
         print(f"\n=== {count} 件で評価 ===")
+        if count < len(texts):
+            texts_count, labels_count = texts[:count], labels[:count]
+        else:
+            texts_count, labels_count = texts, labels
+        tr_x, tr_y, te_x, te_y = stratified_split(texts_count, labels_count)
+        print(f"train: ポジ={tr_y.count('__label__ポジ')}, ネガ={tr_y.count('__label__ネガ')}")
+        print(f"test:  ポジ={te_y.count('__label__ポジ')}, ネガ={te_y.count('__label__ネガ')}")
 
-        texts, labels = load_news_balanced(news_root, limit=count)
-        tr_x, tr_y, te_x, te_y = train_test_split(texts, labels)
-
-        # ---- 辞書方式 ----
-        scores = []
-        for t in tr_x:
-            w = get_words(t)
-            hit = [dic[x] for x in w if x in dic]
-            scores.append(sum(hit) / len(hit) if hit else 0)
-
-        threshold = statistics.median(scores)
-        preds_dict = predict_dict(te_x, dic, threshold)
+        # 辞書方式（改善版）
+        preds_dict = predict_dict_improved(te_x, dic)
         f1_d = f1_score(te_y, preds_dict, average="macro")
-        dict_f1.append(f1_d)
+        dict_f1_list.append(f1_d)
 
-        # ---- fastText ----
-        make_fasttext_file(tr_x, tr_y, "train.txt")
-        make_fasttext_file(te_x, te_y, "test.txt")
-
+        # fastText
+        make_fasttext_file(tr_x, tr_y, dic, "train.txt")
+        make_fasttext_file(te_x, te_y, dic, "test.txt")
+        print("Training fastText model...")
         model = fasttext.train_supervised(
-            "train.txt",
-            epoch=20,
-            lr=0.5,
+            input="train.txt",
+            epoch=50,
+            lr=1.0,
             wordNgrams=2,
+            minCount=1,
+            loss="softmax",
             verbose=0
         )
-
-        preds_ft = [
-            model.predict(t.replace("\n", " "))[0][0]
-            for t in te_x
-        ]
+        preds_ft = [model.predict(" ".join(extract_dict_words(t, dic)))[0][0] for t in te_x]
         f1_f = f1_score(te_y, preds_ft, average="macro")
-        ft_f1.append(f1_f)
+        ft_f1_list.append(f1_f)
 
         print(f"辞書方式 F1 = {f1_d:.3f}")
         print(f"fastText F1 = {f1_f:.3f}")
 
-    return dict_f1, ft_f1
+    return dict_f1_list, ft_f1_list
 
 # =========================================================
-# 8. グラフ描画
+# 9. 結果をグラフ化
 # =========================================================
-def plot_compare(counts, dict_f1, ft_f1):
-    plt.figure(figsize=(10, 5))
-    plt.plot(counts, dict_f1, marker="o", label="辞書方式")
+def plot_results(counts, dict_f1, ft_f1):
+    plt.figure(figsize=(10,5))
+    plt.plot(counts, dict_f1, marker="o", label="辞書方式改善版")
     plt.plot(counts, ft_f1, marker="o", label="fastText")
-    plt.xlabel("ニュース件数")
+    plt.xlabel("使用件数")
     plt.ylabel("F1スコア")
     plt.ylim(0, 1.05)
+    plt.title("ニュース件数増加によるネガポジ分類精度の比較")
     plt.grid(True)
     plt.legend()
-    plt.title("データ件数とネガポジ分類精度の比較")
     plt.show()
 
 # =========================================================
-# 9. main
+# 10. main
 # =========================================================
 def main():
     POLARITY_FILE = "sentiment_dict.txt"
     NEWS_ROOT = "text"
+    counts_list = [10, 50, 100, 200, 500, 1000, 2000, 4000, 8000, 10000]
 
     dic = load_polarity_dict(POLARITY_FILE)
-    counts_list = [500, 1000, 2000, 4000, 8000, 10000]
-
-    dict_f1, ft_f1 = run_full_experiment(dic, NEWS_ROOT, counts_list)
-    plot_compare(counts_list, dict_f1, ft_f1)
+    dict_f1, ft_f1 = run_counts_experiment(dic, NEWS_ROOT, counts_list)
+    plot_results(counts_list, dict_f1, ft_f1)
 
 if __name__ == "__main__":
-    main()  
+    main()
 
