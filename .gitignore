@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+venv/
+.env/
+
+# Editor
+.vscode/
+
+# Data / Model
+*.exe
+*.bin
+*.gz
+*.model
+
+# OS
+AppData/
+Documents/
+Downloads/
+NTUSER.*
