@@ -17,3 +17,10 @@ AppData/
 Documents/
 Downloads/
 NTUSER.*
+
+# macOS
+.DS_Store
+
+# Training data
+*.txt
+
