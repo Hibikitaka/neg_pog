@@ -20,8 +20,8 @@ def tokenize(text):
 # ------------------------------
 # 2. 単語ごとのポジ/ネガ出現回数を集計
 # ------------------------------
-pos_file = "train_pos.txt"
-neg_file = "train_neg.txt"
+pos_file = "text/pos/train_pos.txt"
+neg_file = "text/neg/train_neg.txt"
 
 pos_count = defaultdict(int)
 neg_count = defaultdict(int)
