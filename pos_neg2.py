@@ -1,184 +1,205 @@
-import time
-import pickle
 import numpy as np
-import MeCab
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from pylsl import StreamInlet, resolve_byprop
+from matplotlib import font_manager, rcParams
+from scipy.signal import butter, filtfilt, hilbert
+from pylsl import StreamInlet, resolve_streams
+import time
+import csv
+import math
 
-# ===============================
+# =====================
+# 日本語フォント（Windows）
+# =====================
+font_path = "C:/Windows/Fonts/meiryo.ttc"
+font_prop = font_manager.FontProperties(fname=font_path)
+rcParams["font.family"] = font_prop.get_name()
+
+# =====================
 # 設定
-# ===============================
+# =====================
 FS = 256
-EEG_WINDOW_SEC = 3
-EEG_BASELINE_SEC = 3
+WINDOW_SEC = 4
+N = FS * WINDOW_SEC
 
 CH_AF7 = 1
 CH_AF8 = 2
 
-MAX_POINTS = 50  # グラフ表示の最大点数
+# =====================
+# 信号処理
+# =====================
+def bandpass(data, low, high, fs, order=4):
+    nyq = fs / 2
+    b, a = butter(order, [low/nyq, high/nyq], btype="band")
+    return filtfilt(b, a, data)
 
-# ===============================
-# MeCab
-# ===============================
-tagger = MeCab.Tagger("-Ochasen")
-def tokenize(text):
-    words = []
-    for line in tagger.parse(text).split("\n"):
-        cols = line.split("\t")
-        if len(cols) >= 3:
-            base = cols[2]
-            if base:
-                words.append(base)
-    return words
+def smooth_envelope(env, fs, cutoff=1.5):
+    nyq = fs / 2
+    b, a = butter(2, cutoff/nyq, btype="low")
+    return filtfilt(b, a, env)
 
-# ===============================
-# 感情辞書ロード
-# ===============================
-with open("sentiment_dict.pkl", "rb") as f:
-    sentiment_dict = pickle.load(f)
+def band_envelope(data, band, fs):
+    filtered = bandpass(data, band[0], band[1], fs)
+    env = np.abs(hilbert(filtered))
+    return smooth_envelope(env, fs)
 
-def language_sentiment(text):
-    words = tokenize(text)
-    if not words:
-        return 0.0, "中立"
+# =====================
+# CC / RC / SC 定義（★論文式そのまま）
+# =====================
+def CC(alpha, beta):
+    value = (beta / 2) * (1 + 1 / alpha) * (100 / 2)
+    return min(100, math.floor(value))
 
-    scores = [sentiment_dict.get(w, (0.0, ""))[0] for w in words]
-    score = np.mean(scores)
+def RC(alpha, beta):
+    value = (max(0, (1.0 - beta / 3)) + alpha / 2) * (100 / 2)
+    return min(100, math.floor(value))
 
-    if score > 0.1:
-        label = "ポジ"
-    elif score < -0.1:
-        label = "ネガ"
-    else:
-        label = "中立"
+def SC(alpha, beta):
+    value = (
+        max(0, (1.0 - alpha / 3) / 5)
+        + (((beta / (2 * alpha)) * 4 / 5))
+    ) * 100
+    return min(100, math.floor(value))
 
-    return score, label
-
-# ===============================
-# EEG 接続
-# ===============================
+# =====================
+# LSL 接続
+# =====================
 print("EEG stream 探索中...")
-streams = resolve_byprop("type", "EEG", timeout=5)
-if not streams:
-    raise RuntimeError("EEG stream が見つかりません")
-inlet = StreamInlet(streams[0])
-print("EEG 接続完了")
+streams = resolve_streams()
+eeg_streams = [s for s in streams if s.type() == "EEG"]
 
-def collect_eeg(seconds):
-    buf = []
-    start = time.time()
-    while time.time() - start < seconds:
-        sample, _ = inlet.pull_sample(timeout=1.0)
-        if sample:
-            eeg = (sample[CH_AF7] + sample[CH_AF8]) / 2
-            buf.append(eeg)
-    return np.array(buf)
+if not eeg_streams:
+    raise RuntimeError("EEG stream が見つかりません（muselsl stream を起動してください）")
 
-def eeg_sentiment(eeg, baseline):
-    if len(eeg) < 10:
-        return 0.0
-    eeg_corrected = eeg - baseline
-    score = np.mean(eeg_corrected) / 50
-    return np.clip(score, -1, 1)
+inlet = StreamInlet(eeg_streams[0])
+print("EEG stream 接続完了")
 
-def divergence_label(D):
-    if D < 0.2:
-        return "一致"
-    elif D < 0.5:
-        return "軽度乖離"
-    else:
-        return "強乖離"
+# =====================
+# バッファ
+# =====================
+eeg_buf = np.zeros(N)
 
-# ===============================
-# baseline 取得
-# ===============================
-print(f"EEG baseline を {EEG_BASELINE_SEC} 秒間取得中...")
-baseline_eeg = collect_eeg(EEG_BASELINE_SEC)
-baseline = np.mean(baseline_eeg)
-print(f"EEG baseline = {baseline:.3f}")
+# =====================
+# ★ 平常時ベースライン取得
+# =====================
+print("平常時ベースライン取得中（10秒）...")
+alpha_base, beta_base = [], []
+start = time.time()
 
-# ===============================
-# データ保存用リスト
-# ===============================
-timestamps = []
-L_list = []
-E_list = []
-D_list = []
-labels = []
+while time.time() - start < 10:
+    sample, _ = inlet.pull_sample(timeout=1.0)
+    if sample is None:
+        continue
 
-# ===============================
-# グラフ初期化
-# ===============================
-plt.style.use('ggplot')
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10,6), sharex=True)
-line_L, = ax1.plot([], [], label='言語感情 L', color='blue')
-line_E, = ax1.plot([], [], label='EEG感情 E', color='red')
-ax1.set_ylabel("感情スコア")
-ax1.legend()
-ax1.set_ylim(-1, 1)
+    eeg = (sample[CH_AF7] + sample[CH_AF8]) / 2
+    eeg_buf = np.roll(eeg_buf, -1)
+    eeg_buf[-1] = eeg
 
-bar_colors = {'一致':'green', '軽度乖離':'yellow', '強乖離':'red'}
-bars = ax2.bar([], [])
-ax2.set_ylabel("乖離スコア D")
-ax2.set_ylim(0, 1.5)
+    alpha_env = band_envelope(eeg_buf, (8, 13), FS)
+    beta_env  = band_envelope(eeg_buf, (13, 30), FS)
 
-# ===============================
-# アニメーション更新関数
-# ===============================
+    alpha_base.append(np.mean(alpha_env))
+    beta_base.append(np.mean(beta_env))
+
+baseline_alpha = np.mean(alpha_base)
+baseline_beta  = np.mean(beta_base)
+
+print("ベースライン取得完了")
+
+# =====================
+# CSV 保存準備
+# =====================
+csv_file = open("eeg_cc_rc_sc.csv", "w", newline="", encoding="utf-8")
+writer = csv.writer(csv_file)
+writer.writerow([
+    "timestamp",
+    "alpha_ratio",
+    "beta_ratio",
+    "CC",
+    "RC",
+    "SC"
+])
+
+# =====================
+# 描画
+# =====================
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.set_ylim(0, 100)
+ax.set_ylabel("推定値（0–100）")
+
+line_cc, = ax.plot([], [], label="集中 CC", color="red")
+line_rc, = ax.plot([], [], label="リラックス RC", color="green")
+line_sc, = ax.plot([], [], label="ストレス SC", color="blue")
+
+ax.legend()
+history = {"CC": [], "RC": [], "SC": []}
+
+state_text = ax.text(
+    0.02, 0.85, "",
+    transform=ax.transAxes,
+    fontsize=14
+)
+
+# =====================
+# 更新関数
+# =====================
 def update(frame):
-    line_L.set_data(range(len(L_list)), L_list)
-    line_E.set_data(range(len(E_list)), E_list)
+    sample, _ = inlet.pull_sample(timeout=0.0)
+    if sample is None:
+        return
 
-    ax2.clear()
-    ax2.set_ylim(0,1.5)
-    colors = [bar_colors.get(lbl, 'grey') for lbl in labels]
-    ax2.bar(range(len(D_list)), D_list, color=colors)
-    ax2.set_ylabel("乖離スコア D")
+    eeg = (sample[CH_AF7] + sample[CH_AF8]) / 2
+    eeg_buf[:] = np.roll(eeg_buf, -1)
+    eeg_buf[-1] = eeg
 
-    ax1.set_xlim(0, max(MAX_POINTS, len(L_list)))
-    return line_L, line_E
+    alpha_env = band_envelope(eeg_buf, (8, 13), FS)
+    beta_env  = band_envelope(eeg_buf, (13, 30), FS)
 
-ani = FuncAnimation(fig, update, interval=500)
+    alpha = np.mean(alpha_env[-FS*3:])
+    beta  = np.mean(beta_env[-FS*3:])
 
-# ===============================
-# メイン入力ループ
-# ===============================
-print("\n--- EEG × 言語 乖離計算（Enterで発話）---")
-plt.ion()
+    alpha_ratio = alpha / baseline_alpha
+    beta_ratio  = beta  / baseline_beta
+
+    cc = CC(alpha_ratio, beta_ratio)
+    rc = RC(alpha_ratio, beta_ratio)
+    sc = SC(alpha_ratio, beta_ratio)
+
+    for k, v in zip(["CC", "RC", "SC"], [cc, rc, sc]):
+        history[k].append(v)
+        if len(history[k]) > 300:
+            history[k].pop(0)
+
+    line_cc.set_data(range(len(history["CC"])), history["CC"])
+    line_rc.set_data(range(len(history["RC"])), history["RC"])
+    line_sc.set_data(range(len(history["SC"])), history["SC"])
+
+    ax.set_xlim(0, len(history["CC"]))
+
+    state_text.set_text(
+        f"集中 CC : {cc}\n"
+        f"リラックス RC : {rc}\n"
+        f"ストレス SC : {sc}"
+    )
+
+    writer.writerow([
+        time.time(),
+        alpha_ratio,
+        beta_ratio,
+        cc,
+        rc,
+        sc
+    ])
+    csv_file.flush()
+
+    return line_cc, line_rc, line_sc, state_text
+
+# =====================
+# 実行
+# =====================
+ani = FuncAnimation(fig, update, interval=50)
+plt.tight_layout()
 plt.show()
 
-while True:
-    text = input("文章：")
-    if not text:
-        break
+csv_file.close()
 
-    eeg = collect_eeg(EEG_WINDOW_SEC)
-
-    L, lang_label = language_sentiment(text)
-    E = eeg_sentiment(eeg, baseline)
-    D = abs(L - E)
-    S = L - E
-    div_label = divergence_label(D)
-
-    # データ追加
-    timestamps.append(time.time())
-    L_list.append(L)
-    E_list.append(E)
-    D_list.append(D)
-    labels.append(div_label)
-
-    # 最新50点まで保持
-    L_list = L_list[-MAX_POINTS:]
-    E_list = E_list[-MAX_POINTS:]
-    D_list = D_list[-MAX_POINTS:]
-    labels = labels[-MAX_POINTS:]
-
-    print("\n文章:", text)
-    print(f"言語感情 L = {L:.3f} ({lang_label})")
-    print(f"EEG感情  E = {E:.3f}")
-    print(f"乖離スコア D = {D:.3f}")
-    print(f"符号付き乖離 L-E = {S:.3f}")
-    print(f"乖離タイプ = {div_label}")
-
-    plt.pause(0.1)
