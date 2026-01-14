@@ -44,7 +44,7 @@ def band_envelope(data, band, fs):
     return smooth_envelope(env, fs)
 
 # =====================
-# CC / RC / SC 定義（★論文式そのまま）
+# CC / RC / SC 定義
 # =====================
 def CC(alpha, beta):
     value = (beta / 2) * (1 + 1 / alpha) * (100 / 2)

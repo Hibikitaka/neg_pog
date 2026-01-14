@@ -27,7 +27,7 @@ def load_polarity_dict(path):
 # =========================================================
 # 2. MeCab
 # =========================================================
-tagger = MeCab.Tagger("-Ochasen")
+tagger = MeCab.Tagger("-Owakati")
 
 
 def get_words(text):
