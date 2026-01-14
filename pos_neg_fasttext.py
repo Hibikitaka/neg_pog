@@ -5,8 +5,8 @@ import fasttext
 # =========================
 # 設定
 # =========================
-corpus_dir = "pos_neg" \
-"/text"  # livedoor ニュースコーパスの展開先
+corpus_dir = "neg_pog" \
+    "/text"  # livedoor ニュースコーパスの展開先
 train_file = "train.txt"
 model_file = "sentiment.bin"
 
