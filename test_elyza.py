@@ -3,7 +3,9 @@ import json
 import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from pathlib import Path
-from CC_RC_SC.py import get_eeg_state  # EEG状態取得関数
+from ccrcsc import get_eeg_state  # EEG状態取得関数
+from pos_neg import classify  # ネガポジ判定関数
+
 
 def get_eeg_state_safe():
     """
@@ -46,19 +48,20 @@ model.eval()
 # ============================
 # プロンプト生成
 # ============================
-def classify_eeg_state(state):
+def classify_mode_by_sentiment_and_eeg(sentiment_score, state):
     CC, RC, SC = state["CC"], state["RC"], state["SC"]
 
-    if SC > 75 and CC < 40:
-        return "overloaded"      # ストレス過多
-    if SC > 65 and CC > 60:
-        return "panic_focus"     # 焦り集中
-    if RC > 60 and SC < 40:
-        return "relaxed"         # 安定
-    if CC > 70 and SC < 50:
-        return "deep_focus"      # 深い集中
-    if CC < 30 and RC < 30:
-        return "disengaged"      # 注意散漫
+    # ネガポジ・EEG統合判定
+    if SC > 75 and CC < 40 and sentiment_score < -0.1:
+        return "overloaded"      # ストレス過多・ネガティブ度高
+    if SC > 65 and CC > 60 and sentiment_score < -0.05:
+        return "panic_focus"     # 焦り集中・ややネガティブ
+    if RC > 60 and SC < 40 and  sentiment_score > -0.04:
+        return "relaxed"         # 安定・ポジティブ
+    if CC > 70 and SC < 50 and sentiment_score > -0.02:
+        return "deep_focus"      # 深い集中・強ポジ
+    if CC < 30 and RC < 30 and -0.1 < sentiment_score < 0.02:
+        return "disengaged"      # 注意散漫・中立
 
     return "neutral"
 
@@ -97,9 +100,14 @@ AIは自然で簡潔な会話を心がけてください。
 """
 }
 
-def make_prompt(user, state, history):
-    eeg_mode = classify_eeg_state(state)
+def make_prompt(user, state, history, sentiment_score=None, sentiment_label=None):
+    eeg_mode = classify_mode_by_sentiment_and_eeg(sentiment_score=score, state=state)
     eeg_prompt = EEG_PROMPTS[eeg_mode]
+
+    sentiment_info = ""
+    if sentiment_score is not None and sentiment_label is not None:
+        sentiment_info = f"文章感情: {sentiment_label}（スコア: {sentiment_score:.3f}）"
+
 
     system_prompt = f"""
 あなたは人間と自然な日本語会話を行うAIです。
@@ -111,6 +119,7 @@ def make_prompt(user, state, history):
 
 【現在の相手の状態】
 {eeg_prompt}
+{sentiment_info}
 """
 
     return (
@@ -188,11 +197,14 @@ while True:
             break
 
         state = get_eeg_state_safe()
-        prompt = make_prompt(user, state, history)
+        score, label = classify(user)
+
+        prompt = make_prompt(user, state, history, sentiment_score=score, sentiment_label=label)
         reply = generate_reply(prompt, state)
 
         print(f"AI：{reply}")
         print(f"(CC:{state['CC']:.1f} RC:{state['RC']:.1f} SC:{state['SC']:.1f})\n")
+        print(f"文章感情: {label}（スコア: {score:.3f}）\n")
 
         history += f"人間: {user}\nAI: {reply}\n"
 

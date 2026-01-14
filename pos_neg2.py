@@ -1,205 +1,117 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from matplotlib import font_manager, rcParams
-from scipy.signal import butter, filtfilt, hilbert
-from pylsl import StreamInlet, resolve_streams
-import time
-import csv
-import math
+import MeCab
+from collections import defaultdict
 
-# =====================
-# 日本語フォント（Windows）
-# =====================
-font_path = "C:/Windows/Fonts/meiryo.ttc"
-font_prop = font_manager.FontProperties(fname=font_path)
-rcParams["font.family"] = font_prop.get_name()
+# ------------------------------
+# 1. MeCabで形態素解析
+# ------------------------------
+tagger = MeCab.Tagger()
 
-# =====================
-# 設定
-# =====================
-FS = 256
-WINDOW_SEC = 4
-N = FS * WINDOW_SEC
+def tokenize(text):
+    words = []
+    node = tagger.parseToNode(text)
+    while node:
+        features = node.feature.split(",")
+        if len(features) >= 7:
+            base = features[6]
+            if base != "*" and base:
+                words.append(base)
+        node = node.next
+    return words
 
-CH_AF7 = 1
-CH_AF8 = 2
+# ------------------------------
+# 2. 学習データから単語スコアを作成
+# ------------------------------
+pos_file = "text/pos/train_pos.txt"
+neg_file = "text/neg/train_neg.txt"
 
-# =====================
-# 信号処理
-# =====================
-def bandpass(data, low, high, fs, order=4):
-    nyq = fs / 2
-    b, a = butter(order, [low/nyq, high/nyq], btype="band")
-    return filtfilt(b, a, data)
+pos_count = defaultdict(int)
+neg_count = defaultdict(int)
 
-def smooth_envelope(env, fs, cutoff=1.5):
-    nyq = fs / 2
-    b, a = butter(2, cutoff/nyq, btype="low")
-    return filtfilt(b, a, env)
+# ポジ文章
+with open(pos_file, encoding="utf-8") as f:
+    for line in f:
+        for w in tokenize(line.strip()):
+            pos_count[w] += 1
 
-def band_envelope(data, band, fs):
-    filtered = bandpass(data, band[0], band[1], fs)
-    env = np.abs(hilbert(filtered))
-    return smooth_envelope(env, fs)
+# ネガ文章
+with open(neg_file, encoding="utf-8") as f:
+    for line in f:
+        for w in tokenize(line.strip()):
+            neg_count[w] += 1
 
-# =====================
-# CC / RC / SC 定義
-# =====================
-def CC(alpha, beta):
-    value = (beta / 2) * (1 + 1 / alpha) * (100 / 2)
-    return min(100, math.floor(value))
-
-def RC(alpha, beta):
-    value = (max(0, (1.0 - beta / 3)) + alpha / 2) * (100 / 2)
-    return min(100, math.floor(value))
-
-def SC(alpha, beta):
-    value = (
-        max(0, (1.0 - alpha / 3) / 5)
-        + (((beta / (2 * alpha)) * 4 / 5))
-    ) * 100
-    return min(100, math.floor(value))
-
-# =====================
-# LSL 接続
-# =====================
-print("EEG stream 探索中...")
-streams = resolve_streams()
-eeg_streams = [s for s in streams if s.type() == "EEG"]
-
-if not eeg_streams:
-    raise RuntimeError("EEG stream が見つかりません（muselsl stream を起動してください）")
-
-inlet = StreamInlet(eeg_streams[0])
-print("EEG stream 接続完了")
-
-# =====================
-# バッファ
-# =====================
-eeg_buf = np.zeros(N)
-
-# =====================
-# ★ 平常時ベースライン取得
-# =====================
-print("平常時ベースライン取得中（10秒）...")
-alpha_base, beta_base = [], []
-start = time.time()
-
-while time.time() - start < 10:
-    sample, _ = inlet.pull_sample(timeout=1.0)
-    if sample is None:
+# 単語スコア辞書作成
+MIN_COUNT = 1
+sentiment_dict = {}
+for w in set(list(pos_count.keys()) + list(neg_count.keys())):
+    p = pos_count[w]
+    n = neg_count[w]
+    total = p + n
+    if total < MIN_COUNT:
         continue
+    sentiment_dict[w] = (p - n) / total  # -1〜1
 
-    eeg = (sample[CH_AF7] + sample[CH_AF8]) / 2
-    eeg_buf = np.roll(eeg_buf, -1)
-    eeg_buf[-1] = eeg
+# ------------------------------
+# 3. sentiment_dict.txt を読み込む
+# ------------------------------
+# すでに学習データから作った辞書
+# sentiment_dict = {単語: スコア, ...}
 
-    alpha_env = band_envelope(eeg_buf, (8, 13), FS)
-    beta_env  = band_envelope(eeg_buf, (13, 30), FS)
+# sentiment_dict.txt も読み込む
+semantic_dict = {}
+try:
+    with open("text/sentiment_dict.txt", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            if len(parts) != 2:
+                print(f"無効な行をスキップ -> {line}")
+                continue
+            word, score = parts
+            try:
+                semantic_dict[word] = float(score)
+            except ValueError:
+                print(f"スコアが数値でない行をスキップ -> {line}")
+except FileNotFoundError:
+    print("警告: sentint_dict.txt が見つかりません")
+# sentiment_dict に semantic_dict を統合（学習辞書優先）
+for w, score in semantic_dict.items():
+    if w not in sentiment_dict:
+        sentiment_dict[w] = score
 
-    alpha_base.append(np.mean(alpha_env))
-    beta_base.append(np.mean(beta_env))
+print("統合辞書語彙数:", len(sentiment_dict))
 
-baseline_alpha = np.mean(alpha_base)
-baseline_beta  = np.mean(beta_base)
+# ------------------------------
+# 5. 文章判定関数（中立なし版）
+# ------------------------------
+def classify(text):
+    words = tokenize(text)
+    if not words:
+        return 0, "中立"
 
-print("ベースライン取得完了")
+    known_words = [w for w in words if w in sentiment_dict]
+    if not known_words:
+        return 0, "中立"
 
-# =====================
-# CSV 保存準備
-# =====================
-csv_file = open("eeg_cc_rc_sc.csv", "w", newline="", encoding="utf-8")
-writer = csv.writer(csv_file)
-writer.writerow([
-    "timestamp",
-    "alpha_ratio",
-    "beta_ratio",
-    "CC",
-    "RC",
-    "SC"
-])
+    score = sum(sentiment_dict[w] for w in known_words) / len(known_words)
 
-# =====================
-# 描画
-# =====================
-fig, ax = plt.subplots(figsize=(10, 4))
-ax.set_ylim(0, 100)
-ax.set_ylabel("推定値（0–100）")
+    # 閾値調整（中立なし）
+    if score < -0.04:
+        label = "ネガ"
+    else:
+        label = "ポジ"
 
-line_cc, = ax.plot([], [], label="集中 CC", color="red")
-line_rc, = ax.plot([], [], label="リラックス RC", color="green")
-line_sc, = ax.plot([], [], label="ストレス SC", color="blue")
+    return score, label
 
-ax.legend()
-history = {"CC": [], "RC": [], "SC": []}
-
-state_text = ax.text(
-    0.02, 0.85, "",
-    transform=ax.transAxes,
-    fontsize=14
-)
-
-# =====================
-# 更新関数
-# =====================
-def update(frame):
-    sample, _ = inlet.pull_sample(timeout=0.0)
-    if sample is None:
-        return
-
-    eeg = (sample[CH_AF7] + sample[CH_AF8]) / 2
-    eeg_buf[:] = np.roll(eeg_buf, -1)
-    eeg_buf[-1] = eeg
-
-    alpha_env = band_envelope(eeg_buf, (8, 13), FS)
-    beta_env  = band_envelope(eeg_buf, (13, 30), FS)
-
-    alpha = np.mean(alpha_env[-FS*3:])
-    beta  = np.mean(beta_env[-FS*3:])
-
-    alpha_ratio = alpha / baseline_alpha
-    beta_ratio  = beta  / baseline_beta
-
-    cc = CC(alpha_ratio, beta_ratio)
-    rc = RC(alpha_ratio, beta_ratio)
-    sc = SC(alpha_ratio, beta_ratio)
-
-    for k, v in zip(["CC", "RC", "SC"], [cc, rc, sc]):
-        history[k].append(v)
-        if len(history[k]) > 300:
-            history[k].pop(0)
-
-    line_cc.set_data(range(len(history["CC"])), history["CC"])
-    line_rc.set_data(range(len(history["RC"])), history["RC"])
-    line_sc.set_data(range(len(history["SC"])), history["SC"])
-
-    ax.set_xlim(0, len(history["CC"]))
-
-    state_text.set_text(
-        f"集中 CC : {cc}\n"
-        f"リラックス RC : {rc}\n"
-        f"ストレス SC : {sc}"
-    )
-
-    writer.writerow([
-        time.time(),
-        alpha_ratio,
-        beta_ratio,
-        cc,
-        rc,
-        sc
-    ])
-    csv_file.flush()
-
-    return line_cc, line_rc, line_sc, state_text
-
-# =====================
-# 実行
-# =====================
-ani = FuncAnimation(fig, update, interval=50)
-plt.tight_layout()
-plt.show()
-
+# ------------------------------
+# 6. テスト実行
+# ------------------------------
+while True:
+    text = input("文章：")
+    if not text:
+        break
+    score, label = classify(text)
+    print(f"判定: {label}（スコア: {score:.3f}）")
 csv_file.close()
 
