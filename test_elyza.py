@@ -1,35 +1,66 @@
 import torch
 import json
 import os
+import time
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from pathlib import Path
 from ccrcsc import get_eeg_state  # EEG状態取得関数
 from pos_neg import classify  # ネガポジ判定関数
 
 
-def get_eeg_state_safe():
+LAST_VALID_STATE = {
+    "CC": 50.0,
+    "RC": 50.0,
+    "SC": 50.0
+}
+
+def get_eeg_state_safe(path="eeg_state.json", retry=3, wait=0.05):
+    global LAST_VALID_STATE
+
+    for _ in range(retry):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                text = f.read().strip()
+                if not text:
+                    raise ValueError("empty file")
+
+                state = json.loads(text)
+
+                # 値チェック（保険）
+                if all(k in state for k in ("CC", "RC", "SC")):
+                    LAST_VALID_STATE = state
+                    return state
+
+        except (json.JSONDecodeError, ValueError, OSError):
+            time.sleep(wait)
+
+    # 最終手段：直前の正常値
+    return LAST_VALID_STATE
+
+def get_eeg_state_average(duration=10, interval=1.0):
     """
-    eeg_state.json を読む or fallback 50固定
+    指定秒数間 EEG を取得して平均化する
     """
-    # ファイルから最新状態を読む
-    if not os.path.exists("eeg_state.json"):
-        state = {"CC": 50, "RC": 50, "SC": 50}
-    else:
-        with open("eeg_state.json", "r", encoding="utf-8") as f:
-            state = json.load(f)
+    cc_list, rc_list, sc_list = [], [], []
 
-    # 初期化直後・取得失敗時の保険
-    if (
-        state is None
-        or "CC" not in state
-        or "RC" not in state
-        or "SC" not in state
-        or (state["CC"] == 0 and state["RC"] == 0 and state["SC"] == 0)
-    ):
-        state = {"CC": 50, "RC": 50, "SC": 50}
+    start_time = time.time()
 
-    return state
+    while time.time() - start_time < duration:
+        state = get_eeg_state_safe()
 
+        cc_list.append(state["CC"])
+        rc_list.append(state["RC"])
+        sc_list.append(state["SC"])
+
+        time.sleep(interval)
+
+    avg_state = {
+        "CC": sum(cc_list) / len(cc_list),
+        "RC": sum(rc_list) / len(rc_list),
+        "SC": sum(sc_list) / len(sc_list),
+    }
+
+    return avg_state
 
 # ============================
 # モデル設定（ローカル Windows対応）
@@ -106,13 +137,19 @@ AIは自然で簡潔な会話を心がけてください。
 }
 
 def make_prompt(user, state, history, sentiment_score=None, sentiment_label=None):
-    eeg_mode = classify_mode_by_sentiment_and_eeg(sentiment_score=score, state=state)
+    # ① モード判定
+    eeg_mode = classify_mode_by_sentiment_and_eeg(
+        sentiment_score=sentiment_score,
+        state=state
+    )
+
+    # ② プロンプト取得（← これが抜けていた）
     eeg_prompt = EEG_PROMPTS[eeg_mode]
 
+    # ③ 表示用ではなく LLM 用の最小情報
     sentiment_info = ""
     if sentiment_score is not None and sentiment_label is not None:
-        sentiment_info = f"使用プロンプト:{eeg_prompt} 文章感情: {sentiment_label}（スコア: {sentiment_score:.3f}）"
-
+        sentiment_info = f"文章感情: {sentiment_label}（スコア: {sentiment_score:.3f}）"
 
     system_prompt = f"""
 あなたは人間と自然な日本語会話を行うAIです。
@@ -201,16 +238,28 @@ while True:
             print("終了します")
             break
 
-        state = get_eeg_state_safe()
-        score, label = classify(user)
+        print("EEG計測中（10秒）...")
+        state = get_eeg_state_average(duration=10)
+        print("EEG計測完了")
 
-        prompt = make_prompt(user, state, history, sentiment_score=score, sentiment_label=label)
+        sentiment_score, sentiment_label = classify(user)
+
+        selected_mode = classify_mode_by_sentiment_and_eeg(sentiment_score, state)
+
+        prompt = make_prompt(
+            user,
+            state,
+            history,
+            sentiment_score=sentiment_score,
+            sentiment_label=sentiment_label
+)
         reply = generate_reply(prompt, state)
 
         print(f"AI：{reply}")
-        print(f"(CC:{state['CC']:.1f} RC:{state['RC']:.1f} SC:{state['SC']:.1f})\n")
-        print(f"文章感情: {label}（スコア: {score:.3f}）\n")
-
+        print(f"(CC:{state['CC']:.1f} RC:{state['RC']:.1f} SC:{state['SC']:.1f})")
+        print(f"文章感情: {sentiment_label}（スコア: {sentiment_score:.3f}）")
+        print(f"選択プロンプト: {selected_mode}")
+        
         history += f"人間: {user}\nAI: {reply}\n"
 
     except KeyboardInterrupt:
