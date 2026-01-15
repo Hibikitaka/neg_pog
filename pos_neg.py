@@ -104,8 +104,4 @@ def classify(text):
 
     return score, label
 
-def classify_text(text):
-    """
-    入力文をネガポジ判定してスコアとラベルを返す
-    """
-    return classify(text)  # 既存の classify 関数を利用
+

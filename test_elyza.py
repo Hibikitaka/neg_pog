@@ -52,18 +52,23 @@ def classify_mode_by_sentiment_and_eeg(sentiment_score, state):
     CC, RC, SC = state["CC"], state["RC"], state["SC"]
 
     # ネガポジ・EEG統合判定
-    if SC > 75 and CC < 40 and sentiment_score < -0.1:
-        return "overloaded"      # ストレス過多・ネガティブ度高
-    if SC > 65 and CC > 60 and sentiment_score < -0.05:
-        return "panic_focus"     # 焦り集中・ややネガティブ
-    if RC > 60 and SC < 40 and  sentiment_score > -0.04:
-        return "relaxed"         # 安定・ポジティブ
-    if CC > 70 and SC < 50 and sentiment_score > -0.02:
-        return "deep_focus"      # 深い集中・強ポジ
-    if CC < 30 and RC < 30 and -0.1 < sentiment_score < 0.02:
-        return "disengaged"      # 注意散漫・中立
+    if SC > 75 and CC < 40 and sentiment_score < -0.3:
+        return "overloaded"
+
+    if SC > 65 and CC > 60 and -0.3 <= sentiment_score < -0.1:
+        return "panic_focus"
+
+    if RC > 60 and SC < 40 and -0.1 <= sentiment_score <= 0.2:
+        return "relaxed"
+
+    if CC > 70 and SC < 50 and sentiment_score > 0.3:
+        return "deep_focus"
+
+    if CC < 30 and RC < 30 and -0.1 <= sentiment_score <= 0.1:
+        return "disengaged"
 
     return "neutral"
+
 
 EEG_PROMPTS = {
     "overloaded": """
@@ -106,7 +111,7 @@ def make_prompt(user, state, history, sentiment_score=None, sentiment_label=None
 
     sentiment_info = ""
     if sentiment_score is not None and sentiment_label is not None:
-        sentiment_info = f"文章感情: {sentiment_label}（スコア: {sentiment_score:.3f}）"
+        sentiment_info = f"使用プロンプト:{eeg_prompt} 文章感情: {sentiment_label}（スコア: {sentiment_score:.3f}）"
 
 
     system_prompt = f"""
@@ -182,7 +187,7 @@ def generate_reply(prompt, state):
 # ============================
 # メインループ
 # ============================
-print("=== EEG × 日本語GPT チャット ===")
+print("=== EEG × ネガポジ判定 ELYZA 日本語チャット ===")
 print("終了するには空行を入力\n")
 
 # 履歴に追加する部分
