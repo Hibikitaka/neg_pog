@@ -2,10 +2,37 @@ import torch
 import json
 import os
 import time
+import logging
+from datetime import datetime
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from pathlib import Path
 from ccrcsc import get_eeg_state  # EEG状態取得関数
 from pos_neg import classify  # ネガポジ判定関数
+
+# ============================
+# logging 設定
+# ============================
+log_name = datetime.now().strftime("test_elyza_%Y%m%d_%H%M.log")
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# ファイル出力
+fh = logging.FileHandler(log_name, encoding="utf-8")
+# ターミナル出力
+sh = logging.StreamHandler()
+
+formatter = logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(message)s"
+)
+
+fh.setFormatter(formatter)
+sh.setFormatter(formatter)
+
+logger.addHandler(fh)
+logger.addHandler(sh)
+
+logging.info("=== test_elyza.py 起動 ===")
 
 
 LAST_VALID_STATE = {
@@ -13,6 +40,33 @@ LAST_VALID_STATE = {
     "RC": 50.0,
     "SC": 50.0
 }
+
+MODE_CENTERS = {
+    "overloaded": {
+        "CC": 30, "RC": 40, "SC": 80, "sent": -1.0
+    },
+    "panic_focus": {
+        "CC": 70, "RC": 35, "SC": 70, "sent": -0.1
+    },
+    "relaxed": {
+        "CC": 50, "RC": 70, "SC": 50, "sent": -0.06
+    },
+    "deep_focus": {
+        "CC": 80, "RC": 50, "SC": 40, "sent": -0.06 
+    },
+    "disengaged": {
+        "CC": 30, "RC": 30, "SC": 60, "sent": -1.0
+    }
+}
+
+def calc_distance(state, sentiment_score, center):
+    return (
+        (state["CC"] - center["CC"]) ** 2 +
+        (state["RC"] - center["RC"]) ** 2 +
+        (state["SC"] - center["SC"]) ** 2 +
+        ((sentiment_score * 50) - (center["sent"] * 50)) ** 2
+    ) ** 0.5
+
 
 def get_eeg_state_safe(path="eeg_state.json", retry=3, wait=0.05):
     global LAST_VALID_STATE
@@ -67,38 +121,34 @@ def get_eeg_state_average(duration=10, interval=1.0):
 # ============================
 MODEL_PATH = "elyza/Llama-3-ELYZA-JP-8B"
 
+logging.info("ELYZAモデルロード開始")
+
 tokenizer = AutoTokenizer.from_pretrained(str(MODEL_PATH), local_files_only=True)
 model = AutoModelForCausalLM.from_pretrained(
     str(MODEL_PATH),
-    dtype=torch.float16,       
+    dtype=torch.float16,
     device_map="auto",
     local_files_only=True
 )
 model.eval()
 
+logging.info("ELYZAモデルロード完了")
+
 # ============================
 # プロンプト生成
 # ============================
 def classify_mode_by_sentiment_and_eeg(sentiment_score, state):
-    CC, RC, SC = state["CC"], state["RC"], state["SC"]
+    distances = {}
 
-    # ネガポジ・EEG統合判定
-    if SC > 75 and CC < 40 and sentiment_score < -0.3:
-        return "overloaded"
+    for mode, center in MODE_CENTERS.items():
+        d = calc_distance(state, sentiment_score, center)
+        distances[mode] = d
 
-    if SC > 65 and CC > 60 and -0.3 <= sentiment_score < -0.1:
-        return "panic_focus"
+    # 距離が最小のモードを採用
+    selected_mode = min(distances, key=distances.get)
 
-    if RC > 60 and SC < 40 and -0.1 <= sentiment_score <= 0.2:
-        return "relaxed"
+    return selected_mode
 
-    if CC > 70 and SC < 50 and sentiment_score > 0.3:
-        return "deep_focus"
-
-    if CC < 30 and RC < 30 and -0.1 <= sentiment_score <= 0.1:
-        return "disengaged"
-
-    return "neutral"
 
 
 EEG_PROMPTS = {
@@ -224,47 +274,49 @@ def generate_reply(prompt, state):
 # ============================
 # メインループ
 # ============================
-print("=== EEG × ネガポジ判定 ELYZA 日本語チャット ===")
-print("終了するには空行を入力\n")
-
-# 履歴に追加する部分
+print("=== EEG × ネガポジ判定 ELYZA 日本語チャット ===\n")
 history = ""
-
 
 while True:
     try:
         user = input("あなた：").strip()
         if user == "":
-            print("終了します")
+            logging.info("ユーザー終了")
             break
+
+        logging.info(f"USER: {user}")
 
         print("EEG計測中（10秒）...")
         state = get_eeg_state_average(duration=10)
-        print("EEG計測完了")
+        logging.info(
+            f"EEG_AVG CC={state['CC']:.2f} RC={state['RC']:.2f} SC={state['SC']:.2f}"
+        )
 
         sentiment_score, sentiment_label = classify(user)
+        logging.info(
+            f"SENTIMENT {sentiment_label} ({sentiment_score:.3f})"
+        )
 
         selected_mode = classify_mode_by_sentiment_and_eeg(sentiment_score, state)
+        logging.info(f"MODE {selected_mode}")
 
         prompt = make_prompt(
-            user,
-            state,
-            history,
-            sentiment_score=sentiment_score,
-            sentiment_label=sentiment_label
-)
+            user, state, history,
+            sentiment_score, sentiment_label
+        )
+
         reply = generate_reply(prompt, state)
 
         print(f"AI：{reply}")
-        print(f"(CC:{state['CC']:.1f} RC:{state['RC']:.1f} SC:{state['SC']:.1f})")
-        print(f"文章感情: {sentiment_label}（スコア: {sentiment_score:.3f}）")
-        print(f"選択プロンプト: {selected_mode}")
-        
+        logging.info(f"AI: {reply}")
+
         history += f"人間: {user}\nAI: {reply}\n"
 
     except KeyboardInterrupt:
-        print("\n終了します")
+        logging.info("KeyboardInterrupt 終了")
         break
+
+logging.info("=== test_elyza.py 終了 ===")
 
 
 

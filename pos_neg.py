@@ -97,7 +97,7 @@ def classify(text):
     score = sum(sentiment_dict[w] for w in known_words) / len(known_words)
 
     # 閾値調整（中立なし）
-    if score < -0.04:
+    if score < -0.06:
         label = "ネガ"
     else:
         label = "ポジ"

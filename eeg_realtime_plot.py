@@ -3,6 +3,14 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.signal import butter, filtfilt, hilbert
 from pylsl import StreamInlet, resolve_streams
+from matplotlib import rcParams, font_manager
+
+# =====================
+# 日本語フォント（Windows）
+# =====================
+font_path = "C:/Windows/Fonts/meiryo.ttc"
+font_prop = font_manager.FontProperties(fname=font_path)
+rcParams["font.family"] = font_prop.get_name()
 
 # =====================
 # 設定
@@ -58,6 +66,7 @@ if not eeg_streams:
 
 inlet = StreamInlet(eeg_streams[0])
 print("EEG stream 接続完了")
+
 
 # =====================
 # バッファ
