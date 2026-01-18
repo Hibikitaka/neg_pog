@@ -1,3 +1,4 @@
+#engagement_Index.py
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -8,7 +9,6 @@ import time
 import csv
 import math
 import json
-import os
 
 # =====================
 # 最新EEG状態
@@ -16,16 +16,14 @@ import os
 LATEST_STATE = {"CC": 0.0, "RC": 0.0, "SC": 0.0}
 
 def get_eeg_state():
-    """外部呼び出し用：最新EEG状態を返す"""
     return LATEST_STATE.copy()
 
 def save_state():
-    """JSONに最新EEG状態を保存"""
     with open("eeg_state.json", "w", encoding="utf-8") as f:
         json.dump(LATEST_STATE, f, ensure_ascii=False)
 
 # =====================
-# 日本語フォント（Windows）
+# 日本語フォント
 # =====================
 font_path = "C:/Windows/Fonts/meiryo.ttc"
 font_prop = font_manager.FontProperties(fname=font_path)
@@ -60,19 +58,28 @@ def band_envelope(data, band, fs):
     return smooth_envelope(env, fs)
 
 # =====================
-# CC / RC / SC 計算
+# CC / RC / SC（完全EI版）
 # =====================
-def CC(alpha, beta):
-    value = (beta / 2) * (1 + 1 / alpha) * 50
-    return min(100, math.floor(value))
+EPS = 1e-6
 
-def RC(alpha, beta):
-    value = (max(0, (1.0 - beta / 3)) + alpha / 2) * 50
-    return min(100, math.floor(value))
+def normalize(x, xmin, xmax):
+    x = max(xmin, min(x, xmax))
+    return min(100, max(0, int((x - xmin) / (xmax - xmin) * 100)))
+
+def CC(alpha, beta, theta):
+    # 集中度（Engagement Index）
+    ei = beta / (alpha + theta + EPS)
+    return normalize(ei, 0.2, 2.5)
+
+def RC(alpha, beta, theta):
+    # リラックス度（Alpha dominance）
+    rc = alpha / (beta + theta + EPS)
+    return normalize(rc, 0.3, 2.0)
 
 def SC(alpha, beta):
-    value = (max(0, (1.0 - alpha / 3) / 5) + ((beta / (2 * alpha)) * 4 / 5)) * 100
-    return min(100, math.floor(value))
+    # ストレス度（Beta dominance）
+    sc = beta / (alpha + EPS)
+    return normalize(sc, 0.3, 3.0)
 
 # =====================
 # メイン処理
@@ -86,7 +93,7 @@ def main():
     eeg_streams = [s for s in streams if s.type() == "EEG"]
 
     if not eeg_streams:
-        raise RuntimeError("EEG stream が見つかりません（muselsl を起動してください）")
+        raise RuntimeError("EEG stream が見つかりません")
 
     inlet = StreamInlet(eeg_streams[0])
     print("EEG stream 接続完了")
@@ -95,7 +102,7 @@ def main():
 
     # ---------- ベースライン取得 ----------
     print("平常時ベースライン取得中（10秒）...")
-    alpha_base, beta_base = [], []
+    theta_base, alpha_base, beta_base = [], [], []
     start = time.time()
 
     while time.time() - start < 10:
@@ -107,33 +114,38 @@ def main():
         eeg_buf = np.roll(eeg_buf, -1)
         eeg_buf[-1] = eeg
 
+        theta_env = band_envelope(eeg_buf, (4, 7), FS)
         alpha_env = band_envelope(eeg_buf, (8, 13), FS)
         beta_env  = band_envelope(eeg_buf, (13, 30), FS)
 
+        theta_base.append(np.mean(theta_env))
         alpha_base.append(np.mean(alpha_env))
         beta_base.append(np.mean(beta_env))
 
+    baseline_theta = np.mean(theta_base)
     baseline_alpha = np.mean(alpha_base)
     baseline_beta  = np.mean(beta_base)
     print("ベースライン取得完了")
     start_time = time.time()
 
-    # ---------- CSV準備 ----------
-    csv_file = open("eeg_cc_rc_sc.csv", "w", newline="", encoding="utf-8")
+
+    # ---------- CSV ----------
+    csv_file = open("eeg_engagement_Index.csv", "w", newline="", encoding="utf-8")
     writer = csv.writer(csv_file)
     writer.writerow([
-        "timestamp",
-        "elapsed_sec",
-        "theta_raw",
-        "alpha_raw",
-        "beta_raw",
-        "theta_ratio",
-        "alpha_ratio",
-        "beta_ratio",
-        "CC",
-        "RC",
-        "SC"
-    ])
+    "timestamp",
+    "elapsed_sec",
+    "theta_raw",
+    "alpha_raw",
+    "beta_raw",
+    "theta_ratio",
+    "alpha_ratio",
+    "beta_ratio",
+    "CC",
+    "RC",
+    "SC"
+])
+
 
     # ---------- 描画 ----------
     fig, ax = plt.subplots(figsize=(10, 4))
@@ -147,7 +159,7 @@ def main():
     history = {"CC": [], "RC": [], "SC": []}
     state_text = ax.text(0.02, 0.85, "", transform=ax.transAxes, fontsize=14)
 
-    # ---------- 更新関数 ----------
+    # ---------- 更新 ----------
     def update(frame):
         sample, _ = inlet.pull_sample(timeout=0.0)
         if sample is None:
@@ -157,21 +169,22 @@ def main():
         eeg_buf[:] = np.roll(eeg_buf, -1)
         eeg_buf[-1] = eeg
 
+        theta = np.mean(band_envelope(eeg_buf, (4, 7), FS)[-FS*3:])
         alpha = np.mean(band_envelope(eeg_buf, (8, 13), FS)[-FS*3:])
         beta  = np.mean(band_envelope(eeg_buf, (13, 30), FS)[-FS*3:])
 
-        alpha_ratio = alpha / baseline_alpha
-        beta_ratio  = beta  / baseline_beta
+        theta_r = theta / baseline_theta
+        alpha_r = alpha / baseline_alpha
+        beta_r  = beta  / baseline_beta
 
-        cc = CC(alpha_ratio, beta_ratio)
-        rc = RC(alpha_ratio, beta_ratio)
-        sc = SC(alpha_ratio, beta_ratio)
+        cc = CC(alpha_r, beta_r, theta_r)
+        rc = RC(alpha_r, beta_r, theta_r)
+        sc = SC(alpha_r, beta_r)
 
-        # 最新EEG状態更新
         LATEST_STATE["CC"] = cc
         LATEST_STATE["RC"] = rc
         LATEST_STATE["SC"] = sc
-        save_state()  # JSON更新
+        save_state()
 
         for k, v in zip(["CC", "RC", "SC"], [cc, rc, sc]):
             history[k].append(v)
@@ -189,7 +202,7 @@ def main():
             f"ストレス SC : {sc}"
         )
 
-        writer.writerow([time.time(), alpha_ratio, beta_ratio, cc, rc, sc])
+        writer.writerow([time.time(), theta_r, alpha_r, beta_r, cc, rc, sc])
         csv_file.flush()
 
         return line_cc, line_rc, line_sc, state_text
@@ -197,12 +210,7 @@ def main():
     ani = FuncAnimation(fig, update, interval=50, cache_frame_data=False)
     plt.tight_layout()
     plt.show()
-
     csv_file.close()
-
 
 if __name__ == "__main__":
     main()
-
-
-
