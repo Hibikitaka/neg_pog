@@ -58,14 +58,20 @@ def normalize(x, xmin, xmax):
 # =====================
 # FAA派生指標
 # =====================
-def CC(beta_L, beta_R):
-    return normalize(math.log(beta_L + EPS) - math.log(beta_R + EPS), -1.0, 1.0)
+def CC(alpha_L, alpha_R):
+    faa = np.log(alpha_L + EPS) - np.log(alpha_R + EPS)
+    return normalize(faa, -0.5, 0.5)
+
 
 def RC(alpha_L, alpha_R):
-    return normalize((alpha_L + alpha_R) / 2, 0.2, 2.0)
+    diff = abs(np.log(alpha_L + EPS) - np.log(alpha_R + EPS))
+    return normalize(-diff, -0.5, 0.0)
 
-def SC(alpha_L, alpha_R):
-    return normalize(math.log(alpha_R + EPS) - math.log(alpha_L + EPS), -1.0, 1.0)
+
+def SC(beta_L, beta_R):
+    faa_beta = np.log(beta_R + EPS) - np.log(beta_L + EPS)
+    return normalize(faa_beta, -0.5, 0.5)
+
 
 # =====================
 # Δ算出（10秒平均）
