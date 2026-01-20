@@ -58,6 +58,7 @@ def band_envelope(data, band, fs):
     env = np.abs(hilbert(filtered))
     return smooth_envelope(env, fs)
 
+
 # =====================
 # CC / RC / SC 指標
 # =====================
@@ -66,6 +67,7 @@ def CC(alpha, beta):
     return int(np.clip(val, 0, 100))
 
 def RC(alpha, beta):
+    
     val = (max(0, (1.0 - beta / 3)) + alpha / 2) * 50
     return int(np.clip(val, 0, 100))
 
@@ -75,7 +77,6 @@ def SC(alpha, beta):
         + (beta / (2 * alpha + EPS)) * 4 / 5
     ) * 100
     return int(np.clip(val, 0, 100))
-
 # =====================
 # Δ算出（10秒平均）
 # =====================
@@ -152,7 +153,7 @@ def main():
     start_time = time.time()
 
     # ---------- CSV ----------
-    csv_file = open("eeg_cc_rc_sc.csv", "w", newline="", encoding="utf-8")
+    csv_file = open("eeg_cc_rc_sc_optimize.csv", "w", newline="", encoding="utf-8")
     writer = csv.writer(csv_file)
     writer.writerow([
         "timestamp", "elapsed_sec",

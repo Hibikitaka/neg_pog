@@ -9,7 +9,8 @@ FILES = {
     "ccrcsc": "eeg_cc_rc_sc.csv",
     "EI": "eeg_engagement_Index.csv",
     "FAA": "eeg_faa.csv",
-    "SampEn": "eeg_sample_entropy.csv"
+    "SampEn": "eeg_sample_entropy.csv",
+    "ccrcsc_optimize": "eeg_cc_rc_sc_optimize.csv"
 }
 
 DELTA_COLS = {

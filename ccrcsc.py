@@ -66,6 +66,7 @@ def CC(alpha, beta):
     return int(np.clip(val, 0, 100))
 
 def RC(alpha, beta):
+    
     val = (max(0, (1.0 - beta / 3)) + alpha / 2) * 50
     return int(np.clip(val, 0, 100))
 
