@@ -63,18 +63,18 @@ def band_envelope(data, band, fs):
 # CC / RC / SC 指標
 # =====================
 def CC(alpha, beta):
-    val = (beta / 2) * (1 + 1 / (alpha + EPS)) * 50
+    val = (beta / 2) * (1 + 1 / (alpha + 1.2)) * 60
     return int(np.clip(val, 0, 100))
 
 def RC(alpha, beta):
     
-    val = (max(0, (1.0 - beta / 3)) + alpha / 2) * 50
+    val = (max(0, (1.0 - beta / 3)) + alpha / 1.5) * 60
     return int(np.clip(val, 0, 100))
 
 def SC(alpha, beta):
     val = (
         max(0, (1.0 - alpha / 3) / 5)
-        + (beta / (2 * alpha + EPS)) * 4 / 5
+        + (beta / (2 * alpha + EPS)) * 4.2 / 5
     ) * 100
     return int(np.clip(val, 0, 100))
 # =====================

@@ -1,0 +1,60 @@
+\expandafter\ifx\csname ifdraft\endcsname\relax
+% \documentclass{jsarticle}
+% \begin{document}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[h]
+\setbox0\vbox{%
+\baselineskip = -1.00pt
+\sfcode`;=3000
+\def\q{\hspace*{3mm}}
+\begin{quote}
+%\footnotesize
+% \scriptsize
+%\scriptsize \tiny
+
+\begin{list}{}{\leftmargin = 0mm \rightmargin = -5mm \itemsep=1mm \baselineskip = 1mm \itemsep = 0mm \parsep = 0mm \parskip = 0mm \topsep = 0mm}
+\item[] {\bf procedure}  IteratedGreedy\_for\_PFSP \\ %%--- First-Best Improvement $k$-opt Local 
+$\pi$:=NEH\_heuristic;\\
+$\pi$:=IterativeImprovment\_Insertion($\pi$);\\
+$\pi_b$=$\pi$;\\
+\item[ ]\BEGIN
+ 
+\item[1]\q While(termination criterion not satisfied)do
+\item[2]\q\q $\pi'$:=$\pi$;
+\item[3]\q\q \textbf{for} $i$:=1to $d$ do
+\item[4]\q\q\q $\pi'$:= remove one job at random from $\pi'$ and insert it in $\pi'_R$;
+\item[5]\q\q \textbf{endfor}
+\item[6]\q \q\textbf{for} $i$:=1to $d$ do
+\item[7]\q\q\q $\pi'$:= best permitation obtained by inserting job $\pi_R(i)$ in all possible positions of $\pi'$;
+\item[8]\q\q \textbf{endfor}
+\item[9]\q\q$\pi''$:=IterateveImprovement\_insertion($\pi$)
+\item[10]\q\q\q \IF $C_{\max}(\pi'')<C_{\max}(\pi)$ \THEN
+\item[11]\q\q\q\q $\pi$:=$\pi''$;
+\item[12]\q\q\q\q \IF $C_{\max}(\pi)<C_{\max}(\pi_b)$ \THEN
+\item[13]\q\q\q\q $\pi_b$:=$\pi$;
+\item[14]\q\q\q \ENDIF
+\item[15]\q\q \textbf{elseif}(random$\leq$exp\{$-(C_{\max}(\pi'')-C_{\max}(\pi))$/$Temperture$\}) \THEN
+\item[16]\q\q\q$\pi$:=$\pi''$;
+\item[17]\q\q \ENDIF
+\item[18]\q\textbf{endwhile}
+\item[19]\q\textbf{return} $\pi_b$
+\item[ ]\END
+\vspace{-2mm}
+\end{list}
+\end{quote}
+}
+\begin{center}
+\fbox{\box0}
+\end{center}
+%%\vspace{-6mm} \footnotesize \small
+\vspace*{-6mm}
+\caption{Iterated Greedyの擬似コード~\cite{ruiz2007simple}} \label{IGcode}
+\vspace*{0mm}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\expandafter\ifx\csname ifdraft\endcsname\relax
+%  \end{document}
+\fi

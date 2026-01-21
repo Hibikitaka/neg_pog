@@ -1,0 +1,32 @@
+\expandafter\ifx\csname ifdraft\endcsname\relax
+% \documentclass{jsarticle}
+% \begin{document}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[h]
+\normalsize
+\baselineskip = 0.05pt 
+\sfcode`;=3000  \def\q{\hspace*{2mm}}
+\setbox0\vbox{ %]
+\begin{quote}
+\begin{list}{}{\rightmargin=15mm \leftmargin=10mm \labelwidth=20mm %% \parsep = -.7mm
+} 
+\item[　　{\bf 反復局所探索法}] 
+\item[ステップ1] 適当な解を初期解として局所探索法を行い，局所最適解$x$を得る．
+\item[ステップ2] $x$に対してランダムな解の変更を加え，$x'$を得る．
+\item[ステップ3] $x'$を初期解として局所探索法を行い，局所最適解$x$を得る．
+\item[ステップ4] $f(x') < f(x)$ならば$x := x'$とする．
+\item[ステップ5] 終了条件を満たせば，$x$を出力して探索を終了する．
+\item[         ] そうでなければ，ステップ2に戻る．
+\end{list} 
+\end{quote}
+}
+\begin{center}\fbox{\box0}\end{center}
+\caption{反復局所探索法の手続き~\cite{ruiz2007simple}} \label{fig:ils-basic}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\expandafter\ifx\csname ifdraft\endcsname\relax
+%  \end{document}
+\fi

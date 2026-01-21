@@ -1,0 +1,711 @@
+%% Name:	meipsmac.sty
+%% Category:	Style Option
+%% Version:	1.0c at <24-May-92>
+%% Title:	jdvi2kps3.0用網掛け・スクリーンマクロ
+%
+% Copyright (c) 1991-2 by Matsushita Electric Industrial Co., Ltd.
+% Author:	Yuki Kusumi (kusumi@isl.mei.co.jp)
+%
+% Permission is granted for use and non-profit distribution of 
+% meipsmac.sty providing that this notice be clearly maintained,
+% but the right to distribute any portion of meipsmac.sty for 
+% profit or as part of any commercial product is reserved for
+% Matsushita Electric Industrial Co.,Ltd.
+%
+
+\endlinechar=13
+
+%
+%  
+%
+% \tps@maskgray{幅}{高さ}{網のグレースケール}
+%              {枠の線幅 x 2}{枠のグレースケール}{ダミー引数}
+%
+% 指定された領域に枠つきの網を描画する．
+% 但し，長さは単位 sp で数字のみで指定する．
+%
+\def\tps@maskgray#1#2#3#4#5#6{%
+  \hbox{\special{" userdict begin
+                 /sp { 65782 div } def
+                 end
+                 0 0 moveto
+                 #1\space sp 0 rlineto
+                 0 #2\space sp rlineto
+                 -#1\space sp 0 rlineto
+                 closepath
+                 clip
+                 gsave
+                 #3 setgray
+                 fill
+                 grestore
+                 #4 sp dup 0 eq
+                 { pop } { setlinewidth #5 setgray stroke } ifelse
+                 }}}
+
+%
+%
+%  
+%
+% \tps@maskpattern{幅}{高さ}{網のグレースケール}
+%              {枠の線幅 x 2}{枠のグレースケール}{網のパターン}
+%
+
+
+\def\tps@psmaskcmdi{/maskunit {
+    newpath
+    0 setlinewidth
+    2 0 2 90 180 arc stroke
+    2 4 2 180 270 arc stroke
+    4 2 2 90 270 arc stroke } def }
+
+\def\tps@psmaskcmdii{/maskunit {
+    newpath
+    0 setlinewidth
+    0.2 0.2 moveto 1.3 1.3 lineto stroke
+    2.8 0.2 moveto 1.7 1.3 lineto stroke
+    0.2 2.8 moveto 1.3 1.7 lineto stroke
+    2.8 2.8 moveto 1.7 1.7 lineto stroke } def }
+
+\def\tps@psmaskcmdiii{/maskunit {
+    newpath
+    0 setlinewidth
+    0 0 moveto 1 1 lineto stroke
+    0 2 moveto 2 0 lineto stroke
+    0 2 moveto 2 4 lineto stroke
+    1 3 moveto 4 0 lineto stroke
+    2 2 moveto 4 4 lineto stroke
+    3 1 moveto 4 2 lineto stroke
+    2 4 moveto 3 3 lineto stroke } def }%
+
+\def\tps@psmaskcmdiv{/maskunit {
+    newpath
+    0 setlinewidth
+    0 0 moveto 1 1 lineto stroke
+    0 2 moveto 2 0 lineto stroke
+    0 2 moveto 2 4 lineto stroke
+    1 3 moveto 4 0 lineto stroke
+    2 2 moveto 4 4 lineto stroke
+    3 1 moveto 4 2 lineto stroke
+    2 4 moveto 3 3 lineto stroke
+    0 0 moveto 1 1 lineto 0 2 lineto closepath fill
+    4 0 moveto 3 1 lineto 4 2 lineto closepath fill
+    2 4 moveto 1 3 lineto 2 2 lineto
+    3 3 lineto closepath fill } def }%
+
+\def\tps@psmaskcmdv{/maskunit {
+    newpath
+    0 setlinewidth
+    3 3 3 0 360 arc stroke
+    0 3 3 -90 90 arc stroke
+    6 3 3 90 -90 arc stroke
+    3 0 3 0 180 arc stroke
+    3 6 3 180 360 arc stroke } def }%
+
+\def\tps@psmaskcmdvi{/maskunit {
+    newpath
+    0 setlinewidth
+    0 3 moveto 3 0 lineto 6 3 lineto 3 6 lineto
+    closepath stroke
+    1.5 3 moveto 3 1.5 lineto 4.5 3 lineto 3 4.5 lineto
+    closepath stroke } def }%
+
+\def\tps@psmaskcmdvii{/maskunit {
+    newpath
+    0 setlinewidth
+    0 3 moveto 3 0 lineto 6 3 lineto 3 6 lineto
+    closepath stroke
+    1.5 3 moveto 3 1.5 lineto 4.5 3 lineto 3 4.5 lineto
+    closepath stroke
+    0 1.5 moveto 1.5 0 lineto stroke
+    0 4.5 moveto 1.5 6 lineto stroke
+    6 1.5 moveto 4.5 0 lineto stroke
+    6 4.5 moveto 4.5 6 lineto stroke } def }%
+
+\def\tps@psmaskcmdviii{/maskunit {
+    newpath
+    0 setlinewidth
+    0 1 moveto 7 8 lineto 8 7 lineto 1 0 lineto closepath stroke
+    4 1 moveto 7 4 lineto 8 3 lineto 5 0 lineto closepath stroke
+    0 5 moveto 3 8 lineto 4 7 lineto 1 4 lineto closepath stroke } def }%
+
+\def\tps@psmaskcmdvix{/maskunit {
+    newpath
+    0 setlinewidth
+    0 3 moveto 1 1 rlineto 1 -1 rlineto -1 -1 rlineto closepath stroke
+    2 1 moveto 1 1 rlineto 1 -1 rlineto -1 -1 rlineto closepath stroke
+    2 3 moveto 1 1 rlineto 1 -1 rlineto -1 -1 rlineto closepath stroke
+    2 5 moveto 1 1 rlineto 1 -1 rlineto -1 -1 rlineto closepath stroke
+    4 3 moveto 1 1 rlineto 1 -1 rlineto -1 -1 rlineto closepath stroke } def }%
+
+\def\tps@psmaskcmdvx{/maskunit {
+    newpath
+    0 setlinewidth
+    6 0 2 0 180 arc stroke
+    6 0 4 0 180 arc stroke
+    6 0 6 0 180 arc stroke
+    12 0 2 90 180 arc stroke
+    12 0 4 90 180 arc stroke
+    12 0 6 90 180 arc stroke
+    0 0 2 0 90 arc stroke
+    0 0 4 0 90 arc stroke
+    0 0 6 0 90 arc stroke } def }%
+
+\def\tps@psmaskcmddefault{/maskunit {
+    0 0 moveto 20 0 lineto
+    0 20 lineto -20 0 closepath fill} def }%
+
+\def\tps@maskpattern#1#2#3#4#5#6{%
+  \bgroup
+  \ifcase #6
+     \let\tps@psmaskcmd=\tps@psmaskcmdi%
+     \def\tps@psvinc{4}%
+     \def\tps@pshinc{4}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdii%
+     \def\tps@psvinc{3}%
+     \def\tps@pshinc{3}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdiii%
+     \def\tps@psvinc{4}%
+     \def\tps@pshinc{4}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdiv%
+     \def\tps@psvinc{4}%
+     \def\tps@pshinc{4}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdv%
+     \def\tps@psvinc{6}%
+     \def\tps@pshinc{6}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdvi%
+     \def\tps@psvinc{6}%
+     \def\tps@pshinc{6}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdvii%
+     \def\tps@psvinc{6}%
+     \def\tps@pshinc{6}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdviii%
+     \def\tps@psvinc{8}%
+     \def\tps@pshinc{8}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdvix%
+     \def\tps@psvinc{6}%
+     \def\tps@pshinc{6}%
+  \or
+     \let\tps@psmaskcmd=\tps@psmaskcmdvx%
+     \def\tps@psvinc{6}%
+     \def\tps@pshinc{12}%
+  \else
+     \let\tps@psmaskcmd=\tps@psmaskcmddefault%
+     \def\tps@psvinc{4}%
+     \def\tps@pshinc{4}%
+  \fi
+  \hbox{\special{" userdict begin
+                 /sp { 65782 div } def
+                 \tps@psmaskcmd
+                 end
+                 0 0 moveto
+                 #1\space sp 0 rlineto
+                 0 #2\space sp rlineto
+                 -#1\space sp 0 rlineto
+                 closepath
+                 clip
+                 gsave
+                   #3 setgray
+                   0 \tps@pshinc\space#1\space sp {
+                       pop gsave
+                       0 \tps@psvinc\space#2\space sp {
+                          pop maskunit 0 \tps@psvinc\space translate
+                       } for
+                       grestore
+                       \tps@pshinc\space 0 translate } for
+                 grestore
+                 #4 sp dup 0 eq
+                 { pop } { setlinewidth #5 setgray stroke } ifelse
+                 }}%
+   \egroup}
+
+\endlinechar=-1
+
+\newdimen\tps@height
+\newdimen\tps@depth
+\newdimen\tps@width
+\newdimen\tps@linewidth
+\newdimen\tps@radius
+
+\def\maskmargin{.2ex}
+\tps@linewidth=0.4pt
+
+
+%
+% \tps@setMaskDimen{トークンリスト}
+%
+% 引数の内容に対する網の大きさを
+%
+%         \tps@height, \tps@width
+%
+% に設定する．通常のベースラインに合わせるには \tps@depth 分 \lower して
+% 置く．
+%
+
+\def\tps@setMaskDimen#1{
+  \setbox0=\hbox{hg網}
+  \tps@height=\ht0\advance\tps@height by \maskmargin
+  \tps@depth=\dp0\advance\tps@depth by \maskmargin
+  \setbox0=\hbox{#1}
+  \ifdim\tps@height<\ht0\relax
+    \tps@height=\ht0\advance\tps@height by \maskmargin
+  \fi
+  \ifdim\tps@depth<\dp0\relax
+    \tps@depth=\dp0\advance\tps@depth by \maskmargin
+  \fi
+  \advance\tps@height by\tps@depth
+  \tps@width=\wd0}
+
+
+
+%
+% パターン指定に対する，foreground/background のグレースケールの定義
+%
+%
+
+\def\tps@backgroundA{0.9}
+\def\tps@backgroundB{0.8}
+\def\tps@backgroundC{0.7}
+\def\tps@backgroundD{0.4}
+\def\tps@backgroundE{0.3}
+\def\tps@backgroundF{0.2}
+\def\tps@backgroundG{0.1}
+\def\tps@backgroundH{0}
+\def\tps@backgroundI{0}
+\def\tps@backgroundJ{0}
+\def\tps@backgroundK{0}
+\def\tps@backgroundL{0}
+\def\tps@backgroundM{0}
+\def\tps@backgroundN{0}
+\def\tps@backgroundO{0}
+\def\tps@backgroundP{0}
+\def\tps@backgroundQ{0}
+\def\tps@backgroundR{0}
+
+
+\def\tps@foregroundA{0}
+\def\tps@foregroundB{0}
+\def\tps@foregroundC{0}
+\def\tps@foregroundD{1}
+\def\tps@foregroundE{1}
+\def\tps@foregroundF{1}
+\def\tps@foregroundG{1}
+\def\tps@foregroundH{1}
+\def\tps@foregroundI{0}
+\def\tps@foregroundJ{0}
+\def\tps@foregroundK{0}
+\def\tps@foregroundL{0}
+\def\tps@foregroundM{0}
+\def\tps@foregroundN{0}
+\def\tps@foregroundO{0}
+\def\tps@foregroundP{0}
+\def\tps@foregroundQ{0}
+\def\tps@foregroundR{0}
+
+
+\def\tps@maskcmdA{tps@maskgray}
+\def\tps@maskcmdB{tps@maskgray}
+\def\tps@maskcmdC{tps@maskgray}
+\def\tps@maskcmdD{tps@maskgray}
+\def\tps@maskcmdE{tps@maskgray}
+\def\tps@maskcmdF{tps@maskgray}
+\def\tps@maskcmdG{tps@maskgray}
+\def\tps@maskcmdH{tps@maskgray}
+\def\tps@maskcmdI{tps@maskpattern}
+\def\tps@patterncmdI{0}
+\def\tps@maskcmdJ{tps@maskpattern}
+\def\tps@patterncmdJ{1}
+\def\tps@maskcmdK{tps@maskpattern}
+\def\tps@patterncmdK{2}
+\def\tps@maskcmdL{tps@maskpattern}
+\def\tps@patterncmdL{3}
+\def\tps@maskcmdM{tps@maskpattern}
+\def\tps@patterncmdM{4}
+\def\tps@maskcmdN{tps@maskpattern}
+\def\tps@patterncmdN{5}
+\def\tps@maskcmdO{tps@maskpattern}
+\def\tps@patterncmdO{6}
+\def\tps@maskcmdP{tps@maskpattern}
+\def\tps@patterncmdP{7}
+\def\tps@maskcmdQ{tps@maskpattern}
+\def\tps@patterncmdQ{8}
+\def\tps@maskcmdR{tps@maskpattern}
+\def\tps@patterncmdR{9}
+
+
+%
+% \mask{内容}{パターン}
+%
+% 内容: 	網かけする内容
+% パターン:	A 〜 K の文字
+%
+
+\def\mask#1#2{
+  \begingroup
+  \@ifundefined{tps@maskcmd#2}{\def\tps@choice{A}}{\def\tps@choice{#2}}
+  \tps@setMaskDimen{#1}
+  \ifvmode\leavevmode\hbox{}\fi
+  \lower\tps@depth\hbox{%
+     \vbox to \tps@height{}
+     \expandafter\csname\csname tps@maskcmd#2\endcsname\endcsname
+                  {\number\tps@width}
+                  {\number\tps@height}
+                  {\csname tps@background\tps@choice\endcsname}
+                  {0}
+                  {1}
+                  {\csname tps@patterncmd#2\endcsname}}
+  \special{ps: \csname tps@foreground\tps@choice\endcsname\space\space
+               setgray}
+  \endgroup
+  #1
+  \special{ps: 0 setgray}}
+
+%
+%
+%
+%
+
+\def\maskbox#1#2#3#4#5{
+  \bgroup
+  \tps@width=#1
+  \tps@height=#2
+  \ifvmode\leavevmode\hbox{}\fi
+  \@ifundefined{tps@maskcmd#3}{\def\tps@choice{A}}{\def\tps@choice{#3}}
+  \expandafter\csname\csname tps@maskcmd\tps@choice\endcsname\endcsname
+               {\number\tps@width}
+               {\number\tps@height}
+               {\csname tps@background\tps@choice\endcsname}
+               {0}
+               {1}
+               {\csname tps@patterncmd\tps@choice\endcsname}
+  \special{ps: \csname tps@foreground\tps@choice\endcsname\space\space
+               setgray}
+  \vbox to \tps@height{\vss
+                       \hbox to \tps@width{\if#4l\relax\else\hss\fi
+                                           #5
+                                           \if#4r\relax\else\hss\fi}
+                       \vss}
+  \special{ps: 0 setgray}
+  \egroup}
+
+\def\Maskbox#1#2#3#4#5#6{
+  \bgroup
+  \tps@width=#1
+  \tps@height=#2
+  \tps@linewidth=#5
+  \advance\tps@linewidth by \tps@linewidth
+  \ifvmode\leavevmode\hbox{}\fi
+  \@ifundefined{tps@maskcmd#3}{\def\tps@choice{A}}{\def\tps@choice{#3}}
+  \expandafter\csname\csname tps@maskcmd\tps@choice\endcsname\endcsname
+                  {\number\tps@width}
+                  {\number\tps@height}
+                  {\csname tps@background\tps@choice\endcsname}
+                  {\number\tps@linewidth}
+                  {0}
+                  {\csname tps@patterncmd\tps@choice\endcsname}
+  \special{ps: \csname tps@foreground\tps@choice\endcsname\space\space
+               setgray}
+  \vbox to \tps@height{\vss
+                       \hbox to \tps@width{\if#4l\relax\else\hss\fi
+                                           \kern.5\tps@linewidth
+                                           #6
+                                           \kern.5\tps@linewidth
+                                           \if#4r\relax\else\hss\fi}
+                       \vss}
+  \special{ps: 0 setgray}
+  \egroup}
+
+
+%
+% \outline{トークンリスト}
+%
+% 引数の内容を白抜きで組む．但し，英文に関してはPS内蔵フォントのみ
+% 有効．また，内容はLRモードで組まれる．
+%
+
+\def\outline#1{%
+  \mbox{
+    \special{ps: userdict /myjc known not}
+    \special{ps: { userdict /myjc { true charpath %
+                                  gsave %
+                                  3.0 setlinewidth %
+                                  stroke %
+                                  grestore %
+                                  gsave %
+                                  1 setgray fill %
+                                  grestore %
+                                  gsave %
+                                  0 setlinewidth %
+                                  stroke %
+                                  grestore newpath } put } if }%
+    \special{ps: userdict /orgjc known not}
+    \special{ps: { userdict /orgjc /jc load put } if }
+    \special{ps: userdict /orgs known not}
+    \special{ps: { userdict /orgs /s load put } if }
+    \special{ps: userdict begin}%
+    \special{ps: /jc /myjc load def}%
+    \special{ps: /s /myjc load def}%
+    #1
+    \special{ps: /jc /orgjc load def}%
+    \special{ps: /s /orgs load def}
+    \special{ps: end}}}%
+
+%
+% \setgray{グレースケール}
+%
+% グレー値の設定
+%
+
+\def\setgray#1{\def\tps@currentgrayscale{#1}
+               \special{ps: #1\space setgray}}
+
+\def\tps@currentgrayscale{0}
+
+
+%
+%  ¥記号
+%
+
+
+\def\yen{\setbox0=\hbox{Y}%
+         \setbox1=\hbox{Y\/}%
+         \dimen0=\ht0 \advance\dimen0 by \dp0%
+         \dimen1=\wd1 \advance\dimen1 by -1\wd0%
+         \mbox{\hbox to 0pt{\kern .15\wd0%
+                            \vbox{\offinterlineskip%
+                                  \hbox{\kern 0.43\dimen1%
+                                        \vrule height .08ex width .7\wd0}%
+                                  \kern .2\dimen0%
+                                  \hbox{\kern 0.23\dimen1%
+                                        \vrule height .08ex width .7\wd0}%
+                                  \kern .23\dimen0}\hss}%
+               \box0}}
+
+
+
+%---------------------------------------------------------------------------
+%
+% PostScriptによるscreen環境
+%
+
+
+%
+% \tps@putscreenframe{幅}{高}{角の半径}{線幅}{網のグレースケール}
+%         {線のグレースケール}{タイトル位置}{タイトル長さ}{タイトル高さ}
+%
+
+\endlinechar=13
+\def\tps@putscreenframe#1#2#3#4#5#6#7#8#9{\hbox{%
+\special{" userdict begin
+  /sp { 65782 div } def
+  /scr@xlo #4\space sp .5 mul def
+  /scr@xli #3\space sp def
+  /scr@xro #1\space sp scr@xlo sub def
+  /scr@xri #1\space sp scr@xli sub def
+  /scr@yto scr@xlo neg def
+  /scr@yti scr@xli neg def
+  /scr@ybo #2\space sp neg scr@yto sub def
+  /scr@ybi #2\space sp neg scr@yti sub def
+  /scr@r   scr@xli scr@xlo sub def
+  /scr@lw  #4\space sp def
+  /scr@mg  #5\space def
+  /scr@lg  #6\space def
+  /scr@tx  #7\space sp def
+  /scr@tw  #8\space sp def
+  /scr@th  #9\space sp def
+  end
+  scr@xli scr@yto moveto
+  scr@xro scr@yto scr@xro scr@yti scr@r arcto
+  4 { pop } repeat
+  scr@xro scr@ybo scr@xri scr@ybo scr@r arcto
+  4 { pop } repeat
+  scr@xlo scr@ybo scr@xlo scr@ybi scr@r arcto
+  4 { pop } repeat
+  scr@xlo scr@yto scr@xli scr@yto scr@r arcto
+  4 { pop } repeat
+  closepath
+  gsave scr@mg setgray fill grestore
+  gsave
+    scr@lw 0 ne
+    { scr@lw setlinewidth
+      scr@lg setgray
+      stroke } if
+  grestore
+  newpath
+  scr@tw 0 ne
+  { scr@tx scr@xlo moveto
+    scr@tw 0 rlineto
+    scr@th setlinewidth 
+    1 setgray stroke } if }}}
+
+
+\endlinechar=-1
+
+\newdimen\sc@r
+\newdimen\sc@lw
+\newtoks\sc@str
+\newtoks\sc@size
+\newtoks\sc@font
+\newtoks\sc@jfont
+\newtoks\sc@pos
+\newtoks\sc@mg
+\newtoks\sc@lg
+
+\newsavebox{\scb@x}
+\newdimen\sc@w
+\newdimen\sc@d
+\newdimen\sc@th
+\newdimen\sc@tw
+\newdimen\sc@tx
+\newdimen\sc@ts
+\newdimen\sc@txw
+
+
+\def\setscr@title#1{\sc@str={#1}}
+\def\setscr@titlesize#1{\sc@size={#1}}
+\def\setscr@titlefont#1{\sc@font={#1}}
+\def\setscr@titlejfont#1{\sc@jfont={#1}}
+\def\setscr@titleposition#1{\sc@pos={#1}}
+\def\setscr@maskgray#1{\sc@mg={#1}}
+\def\setscr@linewidth#1{\sc@lw=#1}
+\def\setscr@linegray#1{\sc@lg={#1}}
+\def\setscr@radius#1{\sc@r=#1}
+ 
+\def\set@scrparms#1=#2,{\@nameuse{setscr@#1}{#2}}
+\def\parse@scrparms#1{\@for\@scropt:=#1\do
+                             {\expandafter\set@scrparms\@scropt,}}
+
+\def\init@scrparms{
+  \sc@r=10pt
+  \sc@lw=.4pt
+  \sc@str={}
+  \sc@size={normalsize}
+  \sc@font={bf}
+  \sc@jfont={gt}
+  \sc@pos={c}
+  \sc@mg={1}
+  \sc@lg={0}}
+
+\def\Screen{\@ifnextchar[{\@Screen}{\@Screen[]}}
+
+
+\def\@Screen[#1]{
+  \ifhmode\par\fi
+  \init@scrparms
+  \parse@scrparms{#1}
+  \par\vspace{.3\baselineskip}
+  \sc@txw\linewidth
+  \advance\sc@txw by -1\leftskip
+  \advance\sc@txw by -1\rightskip
+  \sc@w\sc@txw
+  \advance\sc@w by -2\sc@r
+  \setbox\scb@x=\hbox\bgroup\begin{minipage}{\sc@w}}
+
+\def\endScreen{\@endScreen[b]}
+
+\def\@endScreen[#1]{
+  \end{minipage}\egroup
+  \sc@d=\ht\scb@x\advance\sc@d by\dp\scb@x
+  \ifx#1b
+    \advance\sc@d by 2\sc@r
+    \let\@@putframe=\tps@putscreenframe
+    \let\@@topskip=\vss
+    \let\@@btmskip=\vss
+    \let\@@titletopskip=\relax
+  \else
+    %% To addjust bottom/top mergin in upperscreen/lowerscreen,
+    %% modify following coefficient '2.5'.
+    \advance\sc@d by 2.5\sc@r
+    \ifx#1u
+      \let\@@putframe=\tps@putupperscreenframe
+      \def\@@topskip{\kern\sc@r}
+      \let\@@btmskip=\vss
+      \let\@@titletopskip=\relax
+    \else
+      \let\@@putframe=\tps@putlowerscreenframe
+      \let\@@topskip=\vss
+      \def\@@btmskip{\kern\sc@r}
+      \def\@@titletopskip{\kern\sc@d}
+    \fi
+  \fi  
+  \setbox0=\hbox{\csname\the\sc@size\endcsname%
+                 \csname\the\sc@font\endcsname%
+                 \csname\the\sc@jfont\endcsname\the\sc@str}
+  \sc@tw=\wd0
+  \sc@th=\dp0\advance\sc@th by\ht0
+  \sc@ts=\sc@th
+  \advance\sc@ts by -1\sc@lw
+  \divide\sc@ts by 2
+  \ifdim\sc@tw>0pt
+    \advance\sc@tw by .4em
+    \advance\sc@d by \sc@ts
+  \else
+    \sc@ts\z@
+  \fi
+  \if l\the\sc@pos\relax
+    \sc@tx=\sc@r
+  \else
+    \if r\the\sc@pos\relax
+      \sc@tx=\sc@txw
+      \advance\sc@tx by -1\sc@r
+      \advance\sc@tx by -1\sc@tw
+    \else
+      \sc@tx=.5\sc@txw
+      \advance\sc@tx by -.5\sc@tw
+    \fi
+  \fi
+  \vskip\sc@ts
+  \ifvmode\noindent\leavevmode\fi
+  \vbox to \sc@d{%
+    \offinterlineskip
+    \hbox to 0pt{\@@putframe{\number\sc@txw}%	width
+                            {\number\sc@d}%		height
+                            {\number\sc@r}%		radius
+                            {\number\sc@lw}%		linewidth=.4pt
+                            {\the\sc@mg}%		maskgray
+                            {\the\sc@lg}%		linegray
+                            {\number\sc@tx}%		x-crd of title
+                            {\number\sc@tw}%		width of title
+                            {\number\sc@th}%		height of title
+                 \kern\sc@tx
+                 \vbox to 0pt{\@@titletopskip
+                     \vbox to 0pt{\vss\hbox to \sc@tw{\hss\box0\hss}\vss}\vss}
+                 \hss}
+    \vskip\sc@ts
+    \@@topskip
+    \hbox to \sc@txw{\hss\box\scb@x\hss}
+    \@@btmskip}\par}
+
+\def\screen{\@ifnextchar[{\@screen}{\@screen[0]}}
+
+\def\@screen[#1]{
+  \ifcase#1\sc@r=10pt
+  \or\sc@r=9pt
+  \or\sc@r=8pt
+  \or\sc@r=7pt
+  \or\sc@r=6pt
+  \or\sc@r=5pt
+  \or\sc@r=4pt
+  \or\sc@r=3pt
+  \else\sc@r=2pt
+  \fi
+  \Screen[radius=\sc@r]}
+
+\let\endscreen=\endScreen
+
+\def\itembox{\@ifnextchar[{\@itembox}{\@itembox[c]}}
+
+\def\@itembox[#1]#2{
+  \Screen[radius=10pt,linewidth=.8pt,titleposition=#1,title=#2]}
+
+\let\enditembox=\endScreen
+
+\endlinechar=13
+

@@ -1,0 +1,31 @@
+\expandafter\ifx\csname ifdraft\endcsname\relax
+% \documentclass{jsarticle}
+% \begin{document}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[h]
+\normalsize
+\baselineskip = 0.05pt 
+\sfcode`;=3000  \def\q{\hspace*{2mm}}
+\setbox0\vbox{ %]
+\begin{quote}
+\begin{list}{}{\rightmargin=15mm \leftmargin=10mm \labelwidth=20mm %% \parsep = -.7mm
+} 
+\item[　　{\bf 反復局所探索法}] 
+\item[ステップ1] ランダムな初期解$x$を生成する．
+\item[ステップ2] $x$に対してシフト近傍を行い近傍解を生成する．
+\item[ステップ3] 確率を用いて解の更新を行う．
+\item[ステップ4] 終了条件を満たせば，$x$を出力して探索を終了する．
+\item[         ] そうでなければ，ステップ2に戻る．
+\end{list} 
+\end{quote}
+}
+\begin{center}\fbox{\box0}\end{center}
+\caption{反復局所探索法の手続き} \label{fig:ils-basic}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\expandafter\ifx\csname ifdraft\endcsname\relax
+%  \end{document}
+\fi

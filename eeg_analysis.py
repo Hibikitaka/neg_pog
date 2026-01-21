@@ -1,3 +1,4 @@
+# eeg_analysis.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,10 +8,10 @@ import matplotlib.pyplot as plt
 # =====================
 FILES = {
     "ccrcsc": "eeg_cc_rc_sc.csv",
+    "ccrcsc_optimize": "eeg_cc_rc_sc_optimize.csv",
     "EI": "eeg_engagement_Index.csv",
     "FAA": "eeg_faa.csv",
-    "SampEn": "eeg_sample_entropy.csv",
-    "ccrcsc_optimize": "eeg_cc_rc_sc_optimize.csv"
+    "SampEn": "eeg_sample_entropy.csv",  
 }
 
 DELTA_COLS = {

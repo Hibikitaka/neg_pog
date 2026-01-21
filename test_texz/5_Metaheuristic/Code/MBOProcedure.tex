@@ -1,0 +1,54 @@
+\expandafter\ifx\csname ifdraft\endcsname\relax
+ \documentclass{jsarticle}
+ \begin{document}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[H]
+\setbox0\vbox{%
+\baselineskip = 0.05pt
+\sfcode`;=3000  \def\q{\hspace*{1mm}}
+\begin{quote}
+\footnotesize
+\small
+\begin{list}{}{\leftmargin=0mm \rightmargin=0mm \itemsep= 0mm 
+%%\baselineskip = 1mm 
+\itemsep = 0mm \parsep = 0mm \parskip = 0mm \topsep = 0mm
+}
+\item[] {\bf Pseudocode } MBO\\ 
+% {\bf input:}  graph $G=(V,A)$; \\
+% {\bf output:} best solution $S_{best}$; \\
+$n$ = the number of initial solutions (birds)\\
+$k$ = the number of neighbor solutions to be considered\\
+$x$ = the number of neighbor solutions to be shared with the next solution\\
+$m$ = number of tours\\
+$K$ = iteration limit\\
+\BEGIN
+\item[1]   Generate n initial solutions in a random manner and place them on an hypothetical V formation arbitrarily
+\item[2]   $i = 0$
+\item[3]   {\bf while}($i < K$)
+\item[4]   \q {\bf for} ($j = 0; j < m;j++$)
+\item[5]   \q\q Try to improve the leading solution by generating and evaluating $k$ neighbors of it
+\item[6]   \q\q $i = i + k$
+\item[7]   \q\q {\bf for} each solution sr in the flock (except leader)
+\item[8]   \q\q \q Try to improve sr by evaluating ($k–x$) neighbors of it and $x$ unused best neighbors from the solution in the front
+\item[9]  \q\q\q  $i = i + (k  x)$ 
+\item[10] \q\q {\bf endfor}
+\item[11] \q {\bf endfor}
+\item[12] \q Move the leader solution to the end and forward one of the solutions following it to the leader position
+\item[13] {\bf endwhile}
+\item[14] return the best solution in the flock
+\END
+\end{list}
+\end{quote}
+}
+\begin{center}
+\fbox{\box0}
+\end{center}
+\caption{MBOの擬似コード\cite{duman2012migrating}}\label{code:mbo}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\expandafter\ifx\csname ifdraft\endcsname\relax
+  \end{document}
+\fi

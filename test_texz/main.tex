@@ -1,0 +1,104 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 岡山理科大学 工学部 情報工学科
+%     片山研究室用 学位論文LaTeXファイル
+%
+% 作成者：岡山理科大学 工学部 情報工学科
+%                              片山 謙吾
+%
+% Visual Studio Code対応化：岡山理科大学 工学部 情報工学科
+%                              青山 優希
+%
+% 改変者：岡山理科大学 工学部 情報工学科
+%                              〇〇 〇〇
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,11pt, dvipdfmx]{ujreport}
+
+\usepackage[dvips]{graphics}
+\usepackage{graphicx}
+\usepackage{epsbox}
+\usepackage{epsfig}
+\usepackage{cprog}
+\usepackage{lineno}
+\usepackage{here}
+\usepackage{algorithm}
+\usepackage{algcompatible}
+\usepackage{amsmath,amssymb}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{color}
+\usepackage{lscape}
+\usepackage{graphics}
+%%%%%%%%%%%%%%%%%%%
+%↓↓↓↓↓　ここから　↓↓↓↓↓↓↓↓↓↓
+%変更不可
+\renewcommand{\baselinestretch}{1.20}
+\oddsidemargin  =   5mm \topmargin      =  -5mm
+\headsep        =  11mm \headheight     =   7mm
+\textheight     = 230mm \textwidth      = 160mm
+%↑↑↑↑↑　ここまで　↑↑↑↑↑↑↑↑↑↑
+%%%%%%%%%%%%%%%%%%%
+
+%%%%%%% For Algorithm Descriptions %%%%%%%%%%
+\def\BEGIN{{\bf begin} }   \def\END{{\bf end;} }
+\def\REPEAT{{\bf repeat} } \def\UNTIL{{\bf until} }
+\def\FOR{{\bf for} }       \def\TO{{\bf to} }
+\def\DO{{\bf do} }         \def\ENDFOR{{\bf endfor} }
+\def\IF{{\bf if} }         \def\THEN{{\bf then} }
+\def\ELSE{{\bf else} }     \def\ENDIF{{\bf endif} }
+\def\RETURN{{\bf return} }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%ファイル分割用
+\newcommand{\ifdraft}{false}
+
+\begin{document}
+
+\include{1_FrontPage/main}
+
+\include{2_Abstract/main}
+
+%%%%%%%%%%%%%%%%%%%
+%↓↓↓↓↓　ここから　↓↓↓↓↓↓↓↓↓↓
+%変更不可
+\pagenumbering{roman} %%\pagestyle{headings}
+\newpage \tableofcontents  %目次の表示
+\newpage \listoffigures    %図目次の表示
+\newpage \listoftables     %表目次の表示
+\clearpage
+\setcounter{page}{1}     % ページカウンタを１にする
+\pagenumbering{arabic}   % ページを数字にする
+\pagestyle{headings}
+%↑↑↑↑↑　ここまで　↑↑↑↑↑↑↑↑↑↑
+%%%%%%%%%%%%%%%%%%%
+
+
+
+  \include{3_Introduction/main}
+
+  \include{4_COP/main}
+
+  \include{5_Metaheuristic/main}
+
+
+  % セクションを追加する場合は、フォルダを作成し、例に則ってinclude文をここへ追加する。
+
+  \include{51_Conclusion/main}
+
+  \include{52_Thank/main}
+ 
+
+\bibliography{bib-DARP}
+\bibliographystyle{junsrt}  %% junsrt
+
+\setcounter{chapter}{0}
+\renewcommand{\prechaptername}{付録}
+\renewcommand{\postchaptername}{}
+\renewcommand{\thechapter}{\Alph{chapter}}
+
+\include{91_AppendixA/AppendixA}
+
+
+\end{document}

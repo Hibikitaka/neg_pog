@@ -1,0 +1,52 @@
+\expandafter\ifx\csname ifdraft\endcsname\relax
+% \documentclass{jsarticle}
+% \begin{document}
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[h]
+\setbox0\vbox{%
+\baselineskip = -1.00pt
+\sfcode`;=3000
+\def\q{\hspace*{3mm}}
+\begin{quote}
+%\footnotesize
+
+%\scriptsize \tiny
+
+\begin{list}{}{\leftmargin = 0mm \rightmargin = -5mm \itemsep=1mm \baselineskip = 1mm \itemsep = 0mm \parsep = 0mm \parskip = 0mm \topsep = 0mm}
+\item[] {\bf procedure} IterateveImprovement\_insertion($\pi$) \\ %%--- First-Best Improvement $k$-opt Local 
+\item[ ]\BEGIN
+ 
+\item[1]$improve$ :=true;
+\item[2]\textbf{while}($improve$=true) \textbf{do} 
+\item[3]\q $improve$ := false;
+\item[4]\q \textbf{for} $i$:=1to $d$ do
+\item[5]\q\q remove a job $k$ at random from $\pi$(wihout repetition)
+\item[6]\q \q\textbf{for} $i$:=1to $d$ do
+\item[7]\q\q\q $\pi'$:= best permitation obtained by inserting job $k$ in any possible positions of $\pi$;
+\item[8]\q\q\q \IF $C_{\max}(\pi')-C_{\max}(\pi)$ \THEN
+\item[10]\q\q\q\q  $\pi'$:=$\pi$
+\item[11]\q\q\q\q $improve$:=$true$;
+\item[12]\q\q\q \ENDIF
+\item[13]\q\q \textbf{endfor};
+\item[14]\q \textbf{endwhile}
+\item[15]\q \textbf{return}$\pi$
+\item[ ]\END
+\vspace{-2mm}
+\end{list}
+\end{quote}
+}
+\begin{center}
+\fbox{\box0}
+\end{center}
+%%\vspace{-6mm} \footnotesize \small
+\vspace*{-6mm}
+\caption{Local Searchの擬似コード~\cite{ruiz2007simple}} \label{LScode}
+\vspace*{0mm}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\expandafter\ifx\csname ifdraft\endcsname\relax
+%  \end{document}
+\fi
