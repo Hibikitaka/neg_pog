@@ -27,32 +27,40 @@ CH_AF8 = 2
 # =====================
 LATEST_STATE = {"CC": 0.0, "RC": 0.0, "SC": 0.0}
 
+
 def get_eeg_state():
     return LATEST_STATE.copy()
+
 
 def save_state():
     with open("eeg_state.json", "w", encoding="utf-8") as f:
         json.dump(LATEST_STATE, f, ensure_ascii=False)
 
+
 # =====================
 # 日本語フォント
 # =====================
-font_path = "C:/Windows/Fonts/meiryo.ttc"
+
+font_path = "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc"
 font_prop = font_manager.FontProperties(fname=font_path)
 rcParams["font.family"] = font_prop.get_name()
 
 # =====================
 # 信号処理
 # =====================
+
+
 def bandpass(data, low, high, fs, order=4):
     nyq = fs / 2
     b, a = butter(order, [low / nyq, high / nyq], btype="band")
     return filtfilt(b, a, data)
 
+
 def smooth_envelope(env, fs, cutoff=1.5):
     nyq = fs / 2
     b, a = butter(2, cutoff / nyq, btype="low")
     return filtfilt(b, a, env)
+
 
 def band_envelope(data, band, fs):
     filtered = bandpass(data, band[0], band[1], fs)
@@ -62,13 +70,17 @@ def band_envelope(data, band, fs):
 # =====================
 # CC / RC / SC 指標
 # =====================
+
+
 def CC(alpha, beta):
     val = (beta / 2) * (1 + 1 / (alpha + EPS)) * 50
     return int(np.clip(val, 0, 100))
 
+
 def RC(alpha, beta):
     val = (max(0, (1.0 - beta / 3)) + alpha / 2) * 50
     return int(np.clip(val, 0, 100))
+
 
 def SC(alpha, beta):
     val = (
@@ -76,6 +88,7 @@ def SC(alpha, beta):
         + (beta / (2 * alpha + EPS)) * 4 / 5
     ) * 100
     return int(np.clip(val, 0, 100))
+
 
 # =====================
 # Δ算出（10秒平均）
@@ -87,6 +100,7 @@ AVG_SAMPLES = AVG_WINDOW_SEC * UPDATE_HZ
 baseline_buffer = {"CC": [], "RC": [], "SC": []}
 avg_buffer = {"CC": [], "RC": [], "SC": []}
 baseline_value = {"CC": None, "RC": None, "SC": None}
+
 
 def update_delta(cc, rc, sc, elapsed_sec):
     avg = {"CC": None, "RC": None, "SC": None}
@@ -117,6 +131,8 @@ def update_delta(cc, rc, sc, elapsed_sec):
 # =====================
 # メイン処理
 # =====================
+
+
 def main():
     print("EEG stream 探索中...")
     streams = resolve_streams()
@@ -188,7 +204,7 @@ def main():
         eeg_buf[-1] = eeg
 
         alpha = np.mean(band_envelope(eeg_buf, (8, 13), FS)[-FS*3:])
-        beta  = np.mean(band_envelope(eeg_buf, (13, 30), FS)[-FS*3:])
+        beta = np.mean(band_envelope(eeg_buf, (13, 30), FS)[-FS*3:])
 
         ar = alpha / baseline_alpha
         br = beta / baseline_beta
@@ -230,6 +246,7 @@ def main():
     plt.show()
 
     csv_file.close()
+
 
 if __name__ == "__main__":
     main()
