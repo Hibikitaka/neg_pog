@@ -1,20 +1,5 @@
 \begin{thebibliography}{1}
 
-\bibitem{ruiz2007simple}
-Rub{\'e}n Ruiz and Thomas St{\"u}tzle.
-\newblock A simple and effective iterated greedy algorithm for the permutation flowshop scheduling problem.
-\newblock {\em European journal of operational research}, Vol. 177, No.~3, pp. 2033--2049, 2007.
-
-\bibitem{osman1989simulated}
-Ibrahim~H Osman and CN~Potts.
-\newblock Simulated annealing for permutation flow-shop scheduling.
-\newblock {\em Omega}, Vol.~17, No.~6, pp. 551--557, 1989.
-
-\bibitem{duman2012migrating}
-Ekrem Duman, Mitat Uysal, and Ali~Fuat Alkaya.
-\newblock Migrating birds optimization: a new metaheuristic approach and its performance on quadratic assignment problem.
-\newblock {\em Information Sciences}, Vol. 217, pp. 65--77, 2012.
-
 \bibitem{fernandez2019best}
 Victor Fernandez-Viagas and Jose~M Framinan.
 \newblock A best-of-breed iterated greedy for the permutation flowshop scheduling problem with makespan objective.
