@@ -1,10 +1,5 @@
 \begin{thebibliography}{1}
 
-\bibitem{Yag-Iba:2001}
-柳浦睦憲, 茨木俊秀.
-\newblock 組合せ最適化---メタ戦略を中心として---.
-\newblock 朝倉書店, 2001.
-
 \bibitem{ruiz2007simple}
 Rub{\'e}n Ruiz and Thomas St{\"u}tzle.
 \newblock A simple and effective iterated greedy algorithm for the permutation flowshop scheduling problem.
