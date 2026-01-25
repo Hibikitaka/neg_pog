@@ -12,7 +12,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 本章では， 本研究で用いる脳波データから脳状態を取得するために必要な理論と手法について説明する．
 具体的には， 注意集中度や課題関与度を反映する指標として用いられる．まず，これまでの研究で提案されてきたEngagement Index（EI），Frontal Alpha/Beta Asymmetry（FAA），Sample Entropyの3つの指標について解説する．
-次に，H30年度卒業生の平野加奈子先輩が考案した脳波指標について説明する．
+次に，片山研究室H30年度卒業生の平野の研究によって考案された脳波指標について説明する．
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Engagement Index（EI）に基づく脳波指標}
@@ -377,7 +377,7 @@ SCが高い値を示す場合，
 神経活動が不安定化し，
 精神的緊張やストレス状態にある可能性が高いと解釈される．
 
-\section{過去の卒業生の研究に基づく経験的CC・RC・SC算出式}
+\section{H30年度卒業生の研究に基づく経験的CC・RC・SC算出式}
 
 本研究では，
 理論モデルに基づく指標に加え，
@@ -641,27 +641,139 @@ Muse S では， 主に以下の周波数帯域に分類された脳波データ
 これらの周波数帯域は， 被験者の精神状態や覚醒度と密接な関係を有している． $\alpha$ 波は安静時やリラックス状態で増加する傾向があり， $\beta$ 波は集中や緊張状態において顕著となる． $\theta$ 波は瞑想状態や浅い睡眠時に， $\delta$ 波は深い睡眠時に主に観測される．
 本研究では， これらの周波数帯域ごとのパワー値および比率を特徴量として利用する．
 
+\section{Musesの機能}
+MuseS本体の部分ごとの名称と機能について説明する．\\
+
+1.電源ボタン：Muse Sの電源を入れたり切ったりするためのボタン．一回押しがbluetoothのペアリングモード，長押しが電源のオン・オフとなる．\\
+\\
+2.充電ポート：Muse Sの充電を行うためのポート．USB Type-Bコネクタを使用している．フル充電で最大10時間の稼働が可能．\\
+\\
+3.導電部：Muse Sの電極部分であり，頭皮と接触して脳波を計測する．額部分と耳の裏側部分に配置されている．\\
+\\
+4.ヘッドバンド：Muse Sを頭部に固定するためのバンド部分．伸縮性のある素材でできており，様々な頭のサイズに対応可能．\\
+
+%---------------------------------------------------------------------------------------------------------------- Muse S の装着方法  --------------------------------------------------------------------------------------------------------------%
 \section{Muse S の装着方法}
 Muse S はヘッドバンド型の構造を採用しており， 比較的容易に装着することが可能である． 正確な脳波計測を行うためには， 電極が適切な位置で皮膚と接触していることが重要となる．
-装着時には， 前頭部の電極が左右の眉毛上付近に位置するように調整し， 側頭部の電極が耳の上付近に密着するように装着する． Muse S の装着例を図4．2に示す．
-ドライ電極を使用しているため， 装着準備に要する時間は短いが， 電極の接触状態が不十分な場合， ノイズの混入や信号品質の低下が生じる可能性がある． そのため， 計測前には信号品質を確認することが重要である．
+装着方法と装着例図4.2を以下に示す．\\
+\\
+1. Muse S の充電ポートの電源ボタンを一回押す．ボタンを押すと反対側のLEDがオレンジ色に点灯する．\\
+\\
+2.装着者の頭部の大きさに合わせてヘッドバンドの長さを調整する．調整はバンドの後頭部左側にあるスライド式のアジャスターを使用する．\\
+\\
+3.導電部が額に密着するように，装着を行う．皮膚と電極の間に髪の毛が入らないように注意する．\\
+\\
+4.磁石式の留め具を使用して，ヘッドバンドを装着する．\\
 
 \begin{figure}
 	\centering
-		\includegraphics[width=9cm]{./5_Metaheuristic/Image/muses2.eps}
+		\includegraphics[width=10cm]{./5_Metaheuristic/Image/muses2.eps}
 	\caption{Muse S の装着例}
 	\label{formation}
 \end{figure}
 %---------------------------------------------------------------------------------------------------------------- Bluetooth 接続方法と BLED112 ドングル  --------------------------------------------------------------------------------------------------------------%
-\newpage
+
 \section{Bluetooth 接続方法と BLED112 ドングル}
-Muse S は Bluetooth Low Energy(BLE) による無線通信を用いて外部デバイスと接続する． PC 上で安定したデータ取得を行うため， 本研究では BLE 通信専用の USB ドングルである BLED112 を使用した．
-Muse S と PC の接続構成を図4．3に示す．
+Muse S は Bluetooth Low Energy(BLE) による無線通信を用いて外部デバイスと接続する．Andorid や iphoneなどのスマートフォンと接続することも可能であるが，専用のアプリ以外での接続が出来ず， 取得したデータはアプリ上でのみ閲覧が可能でデータ保存が出来ない仕様となっている．
+専用のアプリを用いずに，Windows， MacOS， Linux などの PCとBluetooth接続を行うことで，脳波情報を読み取り，データの抽出することが可能である．
+PC 上で安定したデータ取得を行うため， 本研究では BLE 通信専用の USB ドングルである BLED112 を使用した．
+本稿では，本研究の開発環境であるWindows11の接続方法について説明する．\\
 
-図4．3 Muse S と PC の Bluetooth 接続構成
+1. BLED112 ドングルを PC の USB ポートに接続する．\\
+\\
+2.VScode などのターミナルソフトウェアを起動し， BLED112 ドングルの COM ポートを確認する．\\
+\\
+3. Muse S の電源を入れ， Bluetooth ペアリングモードにする．\\
+\\
+4. ターミナルソフトウェア上で "musesls stream" コマンドを実行し， Muse S との接続を行う．\\
+\\
+5. 接続が成功すると， 周波数帯域別の脳波データがリアルタイムにターミナル上に表示される．\\
+\\
+対応OSと必要スペックについては以下の通りである．
 
-接続手順としては， まず PC の USB ポートに BLED112 ドングルを接続する． 次に Muse S の電源を入れ， ペアリング可能な状態に設定する． 専用のストリーミング用のプログラムを起動し， 接続可能な BLE デバイスの検索を行った後， Muse S を選択して接続を行う．
-接続が成功すると， Muse S から送信される脳波データがリアルタイムで PC に受信される．
+\begin{table}[htbp]
+  \centering
+  \caption{Muse S の対応OS（Windows）}
+  \label{tab:muse_windows}
+  \begin{tabular}{|c|c|}
+    \hline
+    項目 & 内容 \\
+    \hline
+    対応OS & Windows 10 以降 \\
+    \hline
+    対応機種 & Bluetooth Low Energy 対応PC \\
+    \hline
+    CPU & 公式要件なし（OS要件に準拠） \\
+    \hline
+    メモリ & 公式要件なし（OS要件に準拠） \\
+    \hline
+    備考 & 公式Muse App非対応（SDK/研究用途のみ） \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Muse S の対応OS（macOS）}
+  \label{tab:muse_macos}
+  \begin{tabular}{|c|c|}
+    \hline
+    項目 & 内容 \\
+    \hline
+    対応OS & macOS 12 以降 \\
+    \hline
+    対応機種 & Intel / Apple Silicon（M1以降）Mac \\
+    \hline
+    CPU & 公式要件なし（OS要件に準拠） \\
+    \hline
+    メモリ & 公式要件なし（OS要件に準拠） \\
+    \hline
+    備考 & 公式Muse App非対応（SDK/研究用途のみ） \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Muse S の対応OS（Linux）}
+  \label{tab:muse_linux}
+  \begin{tabular}{|c|c|}
+    \hline
+    項目 & 内容 \\
+    \hline
+    対応OS & Linux（Ubuntu等，BLE対応環境） \\
+    \hline
+    対応機種 & Bluetooth Low Energy 対応PC \\
+    \hline
+    CPU & 公式要件なし（OS要件に準拠） \\
+    \hline
+    メモリ & 公式要件なし（OS要件に準拠） \\
+    \hline
+    備考 & 公式Muse App非対応（SDK/研究用途のみ） \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Muse S の対応OS（iOS）}
+  \label{tab:muse_ios}
+  \begin{tabular}{|c|c|}
+    \hline
+    項目 & 内容 \\
+    \hline
+    対応OS & iOS 15 以上 \\
+    \hline
+    対応機種 & iPhone / iPad（Bluetooth LE対応） \\
+    \hline
+    CPU & Apple A12 Bionic 以降（推奨） \\
+    \hline
+    メモリ & 3 GB 以上（推奨） \\
+    \hline
+    備考 & 公式Muse App対応（主要利用環境） \\
+    \hline
+  \end{tabular}
+\end{table}
 
 %---------------------------------------------------------------------------------------------------------------- データ取得および保存方法  --------------------------------------------------------------------------------------------------------------%
 \section{データ取得および保存方法}
@@ -672,6 +784,129 @@ Muse S と PC の接続構成を図4．3に示す．
 \section{本研究における Muse S の位置づけ}
 本研究において Muse S は， 被験者の内的状態を客観的に取得するための主要なセンサとして位置づけられる． 自己申告やテキスト入力のみに依存せず， 脳波のバイタルデータを用いることで， 潜在的なメンタル状態を推定できる点が本研究の特徴である．
 また， 装着負担が小さい Muse S は， 長時間計測や日常環境での利用にも適しており， 将来的な実用システムへの応用可能性も高い．
+
+
+\chapter{メンタル推定システム}
+本章では本研究で考案したメンタル推定システムの全体構成及び各モジュールの詳細について説明する．
+脳波を利用したシステム開発の研究として脳波と脳状態との関連性から，その特性を利用した学習のサポートシステムの開発や，ユーザのメンタル状態を推定して能動的なフィードバックを行うシステムの開発などが行われている．
+本システムでは，主に「Muse Sにより取得した脳波データのリアルタイム表示」，「取得した脳波データに基づくメンタル状態の推定」を行う．
+このシステムを通したEIやFAA，SampEn，卒業生の研究に基づくメンタル推定計算式の各4つの指標の精度評価実験については，第6章で述べる．
+
+\section{メンタル推定システムの概要}
+本システムは， VScode上で動作するPythonプログラムとして実装されている．MuseSとPCにBluetooth接続を行い， Muse S から送信される脳波データをリアルタイムに取得する．
+取得した脳波データは， 一定時間ごとに区切られ， 周波数帯域別のパワー値や比率を算出することで， メンタル状態推定に用いる特徴量を生成する．
+これらの特徴量を基に， 集中度（CC）， リラックス度（RC）， ストレス度（SC）を算出し， 画面上にリアルタイムで表示する．
+
+\section{メンタル推定システムの操作方法}
+本システムの操作方法について説明する．MuseSの接続からシステムの実行，及びデータの保存方法について述べる．
+\subsection{Muse S の接続}
+VScodeを開き，ターミナル上で"musesls stream"コマンドを実行し，Muse SとのBluetooth接続を行う．
+接続が成功すると，ターミナルに"steaming EEG"と表示される．
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=15cm]{./5_Metaheuristic/Image/setuzoku1.jpg}
+	\caption{MuseSの接続画面}
+	\label{formation}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=15cm]{./5_Metaheuristic/Image/setuzoku2.jpg}
+	\caption{MuseSの接続画面}
+	\label{formation}
+\end{figure}
+
+\subsection{システムの実行}
+MuseSがPCと接続した後，VScode上でメンタル推定システムのPythonプログラムを実行する。
+プログラム実行後，10秒間の安静時データを取得し，ベースラインデータとして保存する．
+その後，リアルタイムで脳波データの取得とメンタル状態の推定が開始される．
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=15cm]{./5_Metaheuristic/Image/stream1.jpg}
+	\caption{平常時ベースライン(10秒)取得画面}
+	\label{formation}
+\end{figure}
+
+\newpage
+\subsection{リアルタイムのメンタル状態の推定}
+取得した脳波データに基づき，リアルタイムでメンタル状態の推定を行う．
+各周波数帯域のパワー値や比率を算出し，集中度（CC），リラックス度（RC），ストレス度（SC）を計算する．
+計算結果は，画面上にリアルタイムで表示される．
+計測したデータは，CSV形式で保存され，後処理による解析に利用できる．
+CSVファイルの内訳は以下の通りである．
+pythonプログラムのコード内の計算式をEI，FAA，SampEn，卒業生の研究に基づくメンタル推定計算式の4つの指標に変更することで，各指標のデータを取得可能である．
+
+\begin{table}[htbp]
+\centering
+\caption{CC, RC, SC指標および関連変数の定義}
+\label{tab:ccrcsc_definition}
+\begin{tabular}{lll}
+\hline
+\textbf{列名} & \textbf{意味} & \textbf{用途} \\
+\hline
+timestamp &
+データを記録した時刻 &
+実時間との同期 \\
+
+elapsed\_sec &
+計測開始からの経過時間 [秒] &
+時系列解析 \\
+
+CC &
+各時刻で算出された集中指標（Concentration Calculation） &
+瞬時的な集中度評価 \\
+
+RC &
+各時刻で算出されたリラックス指標（Relax Calculation） &
+瞬時的なリラックス度評価 \\
+
+SC &
+各時刻で算出されたストレス指標（Stress Calculation） &
+瞬時的なストレス度評価 \\
+
+CC\_avg &
+CCの移動平均値 &
+集中状態の推移把握 \\
+
+RC\_avg &
+RCの移動平均値 &
+リラックス状態の推移把握 \\
+SC\_avg &
+SCの移動平均値 &
+ストレス状態の推移把握 \\
+
+$\Delta$CC &
+CCの変化量（前時刻または平均値との差分） &
+集中状態変化の検出 \\
+
+$\Delta$RC &
+RCの変化量（前時刻または平均値との差分） &
+リラックス状態変化の検出 \\
+
+$\Delta$SC &
+SCの変化量（前時刻または平均値との差分） &
+ストレス状態変化の検出 \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=11cm]{./5_Metaheuristic/Image/stream3.jpg}
+	\caption{各周波数のリアルタイム表示画面}
+	\label{formation}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=11cm]{./5_Metaheuristic/Image/stream2.jpg}
+	\caption{メンタル推定システムのリアルタイム表示画面}
+	\label{formation}
+\end{figure}
 
 
 \chapter{考案システムの評価実験}

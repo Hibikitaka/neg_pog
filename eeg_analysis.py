@@ -8,10 +8,11 @@ import matplotlib.pyplot as plt
 # =====================
 FILES = {
     "ccrcsc": "eeg_cc_rc_sc.csv",
-    "ccrcsc_optimize": "eeg_cc_rc_sc_optimize.csv",
+    "ccrcsc_optimize": "eeg_cc_rc_sc_all_sessions.csv",
     "EI": "eeg_engagement_Index.csv",
     "FAA": "eeg_faa.csv",
-    "SampEn": "eeg_sample_entropy.csv",  
+    "SampEn": "eeg_sample_entropy.csv", 
+    
 }
 
 DELTA_COLS = {
