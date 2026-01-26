@@ -1,13 +1,3 @@
-\begin{thebibliography}{1}
-
-\bibitem{fernandez2019best}
-Victor Fernandez-Viagas and Jose~M Framinan.
-\newblock A best-of-breed iterated greedy for the permutation flowshop scheduling problem with makespan objective.
-\newblock {\em Computers \& Operations Research}, Vol. 112, p. 104767, 2019.
-
-\bibitem{pan2012estimation}
-Quan-Ke Pan and Rub{\'e}n Ruiz.
-\newblock An estimation of distribution algorithm for lot-streaming flow shop problems with setup times.
-\newblock {\em Omega}, Vol.~40, No.~2, pp. 166--180, 2012.
+\begin{thebibliography}{}
 
 \end{thebibliography}
