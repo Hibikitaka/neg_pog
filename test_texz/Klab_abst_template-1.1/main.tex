@@ -100,68 +100,24 @@ mid$\gamma$波 & 41～49.75 & 視覚情報処理 \\
 反対に緊張時には$\alpha$波の振幅が小さくなり$\beta$波の出現が見られるなどの特徴がある．
 また$\beta$波は思考状態，$\gamma$波は高次精神活動と関連しているとされ，$\beta$/$\alpha$は脳の活動を見るための指標としてよく用いられる．
 
-\section{メンタル推定システムの概要}
-
-
-\vspace{-1mm}
-
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.2]{fig/N6-8.png}
-        \vspace{-1mm}
-        \caption{N8近傍構造}
-        \label{fig:n6-7}
-    \end{center}
-\end{figure}
-\vspace{-2mm}
-
-N8近傍構造はN7までの近傍操作に加え，ブロックに含まれる作業をブロック外に移動する近傍操作も含む近傍構造である．
-N8近傍構造はN7近傍構造を，N7近傍構造はN6近傍構造を，N6近傍構造はN5近傍構造を内包する関係にある．本論では，N$x-1$近傍から新たに導入された近傍操作を”N$x$近傍の特有操作”と呼ぶ．
-また，N8近傍はN7, N6，N5と比較して非常に大きな近傍であるため，評価値の改善が見込まれない近傍解を排除する近傍クリッピング\cite{N8}が導入される．
+\section{脳状態を推定する各指標}
 
 \vspace{-2mm}
 
 \section{開発したシステムの評価と実験結果}
 %---------------  表挿入  ---------------%
-\begin{table}[H]
-\begin{center}
-\normalsize
-\caption{}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{|c|c|c|}
-\hline
-タイプ & 測定可能データ(Hz) & 心理状態 \\
-\hline
-$\delta$波 & 0.5～2.75 & 夢を見ない不快睡眠，ノンレム睡眠，無意識 \\
-\hline
-$\theta$波 & 3.5～6.75 & 直感的，創造的，想起，空想，幻想，夢 \\
-\hline
-low$\alpha$波 & 7.5～9.25 & リラックス，平穏意識的 \\
-\hline
-high$\alpha$波 & 10～11.75 & リラックスしているが集中している，統合的 \\
-\hline
-low$\beta$波 & 13～16.75 & 思考，自己および環境の認識 \\
-\hline
-high$\beta$波 & 18～29.75 & 警戒，動揺 \\
-\hline
-low$\gamma$波 & 31～39.75 & 記憶，高次精神活動 \\
-\hline
-mid$\gamma$波 & 41～49.75 & 視覚情報処理 \\
-\hline
-\end{tabular}
-}
-\label{tb:eachfrequency}
-\end{center}
-\end{table}
+\vspace{-1mm}
 
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.2]{fig/Comparison_allmethods.png}
+        \vspace{-1mm}
+        \caption{各指標毎のΔValue値の比較図}
+        \label{fig:n6-7}
+    \end{center}
+\end{figure}
+\vspace{-2mm}
    %---------------  表終了  --------------%
-各N近傍に基づくLSの基本性能を評価するために実験を行った．
-ベンチマーク問題例は，著名なデータセットabzから5題，ftから3題，laから10題，taから10題の計28題を用いた．
-検討するアルゴリズムは，ランダムに生成した初期解に対して，最良移動戦略に基づくLSを実行する．
-本実験では各ベンチマーク問題例に対し，各N近傍を導入した４種のLSで実験し，解の平均精度，各近傍特有操作で改善した回数の割合，初期解から改善したメイクスパンの幅に対する各近傍特有操作の貢献度等を算出した．
-精度は，得られた解$s_{solve}$と，既知の最良解$s_{opt}$との誤差率$\frac{C_{\rm{max}}(s_{solve})-C_{\rm{max}}(s_{opt})}{C_{\rm{max}}(s_{opt})}$であり，0に近いほど，良い結果が出ていることになる．
-表\ref{table:accuracyAvg}に平均精度，表\ref{table:impRangeRate}に初期解から改善したメイクスパンの幅に対する各近傍特有操作の貢献度を示す．
-
 \vspace{-1mm}
 
 % 平均精度テーブル
