@@ -16,7 +16,7 @@ rcParams["font.family"] = font_prop.get_name()
 # =====================
 FILES = {
     "CRS": "eeg_cc_rc_sc.csv",
-    "改良CRS": "eeg_cc_rc_sc_all_sessions.csv",
+    "改良CRS": "eeg_cc_rc_sc_all_sessions2.csv",
     "EI": "eeg_engagement_Index.csv",
     "FAA": "eeg_faa.csv",
     "SampEn": "eeg_sample_entropy.csv", 

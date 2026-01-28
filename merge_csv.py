@@ -7,7 +7,7 @@ import os
 CSV_DIR = "./csv_data"
 
 # 出力ファイル名
-OUTPUT_FILE = "eeg_cc_rc_sc_all_sessions.csv"
+OUTPUT_FILE = "eeg_cc_rc_sc_all_sessions2.csv"
 
 # 対象CSVを取得
 csv_files = sorted(glob.glob(os.path.join(CSV_DIR, "eeg_ccrcsc_measurement2*.csv")))
