@@ -2,13 +2,21 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import font_manager, rcParams
+
+# =====================
+# 日本語フォント設定（Windows）
+# =====================
+font_path = "C:/Windows/Fonts/meiryo.ttc"
+font_prop = font_manager.FontProperties(fname=font_path)
+rcParams["font.family"] = font_prop.get_name()
 
 # =====================
 # 設定
 # =====================
 FILES = {
-    "ccrcsc": "eeg_cc_rc_sc.csv",
-    "ccrcsc_optimize": "eeg_cc_rc_sc_all_sessions.csv",
+    "CRS": "eeg_cc_rc_sc.csv",
+    "改良CRS": "eeg_cc_rc_sc_all_sessions.csv",
     "EI": "eeg_engagement_Index.csv",
     "FAA": "eeg_faa.csv",
     "SampEn": "eeg_sample_entropy.csv", 
@@ -81,12 +89,23 @@ print(delta_table)
 # =====================
 # 可視化：Δ平均 棒グラフ
 # =====================
+METHOD_ORDER = ["EI", "FAA", "SampEn", "CRS", "改良CRS"]
+
+delta_table = delta_table[METHOD_ORDER]
+
 delta_table.plot(kind="bar", figsize=(10, 5))
-plt.ylabel("Δ Value (10s moving avg - baseline)")
-plt.title("Δ Comparison (All Methods)")
+
+plt.ylabel("Δ Value（測定時の値 − 平常時の値）")
+plt.legend(
+    title="手法",
+    bbox_to_anchor=(1.02, 1),
+    loc="upper left"
+)
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
+
 
 # =====================
 # 可視化：ヒートマップ
