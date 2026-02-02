@@ -22,7 +22,7 @@ rcParams["font.family"] = font_prop.get_name()
 # =====================
 FILES = {
     "CRS": "eeg_cc_rc_sc.csv",
-    "改良CRS": "eeg_cc_rc_sc_all_sessions2.csv",
+    "CRS.1": "eeg_cc_rc_sc_all_sessions2.csv",
     "EI": "eeg_engagement_Index.csv",
     "FAA": "eeg_faa.csv",
     "SampEn": "eeg_sample_entropy.csv",
@@ -97,7 +97,7 @@ print(delta_table)
 # =====================
 # 可視化：Δ平均 棒グラフ
 # =====================
-METHOD_ORDER = ["EI", "FAA", "SampEn", "CRS", "改良CRS"]
+METHOD_ORDER = ["EI", "FAA", "SampEn", "CRS", "CRS.1"]
 
 delta_table = delta_table[METHOD_ORDER]
 
