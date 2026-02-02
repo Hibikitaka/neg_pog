@@ -7,7 +7,13 @@ from matplotlib import font_manager, rcParams
 # =====================
 # 日本語フォント設定（Windows）
 # =====================
-font_path = "C:/Windows/Fonts/meiryo.ttc"
+# font_path = "C:/Windows/Fonts/meiryo.ttc"
+# font_prop = font_manager.FontProperties(fname=font_path)
+# rcParams["font.family"] = font_prop.get_name()
+
+from matplotlib import font_manager, rcParams
+
+font_path = "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc"
 font_prop = font_manager.FontProperties(fname=font_path)
 rcParams["font.family"] = font_prop.get_name()
 
@@ -19,8 +25,8 @@ FILES = {
     "改良CRS": "eeg_cc_rc_sc_all_sessions2.csv",
     "EI": "eeg_engagement_Index.csv",
     "FAA": "eeg_faa.csv",
-    "SampEn": "eeg_sample_entropy.csv", 
-    
+    "SampEn": "eeg_sample_entropy.csv",
+
 }
 
 DELTA_COLS = {
@@ -32,6 +38,8 @@ DELTA_COLS = {
 # =====================
 # CSV 読み込み
 # =====================
+
+
 def load_data(path):
     df = pd.read_csv(path)
 
@@ -106,7 +114,6 @@ plt.tight_layout()
 plt.show()
 
 
-
 # =====================
 # 可視化：ヒートマップ
 # =====================
@@ -140,7 +147,3 @@ for method, path in FILES.items():
     axes[-1].set_xlabel("Elapsed Time [sec]")
     plt.tight_layout()
     plt.show()
-
-    
-
-
