@@ -94,7 +94,7 @@ high$\beta$波 & 18～29.75 & 警戒，動揺 \\
 脳状態を推定するための指標は数多く考案されている．Engagement Index(EI)やFrontal Alpha/Beta Asymmetry(FAA)，Sample Entropy(SampEn)などが挙げられる．
 しかし，それらの指標は特定の一つのアプローチにのみに有効である．平成30年の研究で提案された手法では，複数のメンタル状態を推定する手法として
 集中値(CC)やリラックス値(RC)，ストレス値(SC)を測定する計算式を提案している．
-以下がメンタル推定式(ccrcsc)である．
+以下が従来推定式(CRS)である．
 \begin{eqnarray}
 &&\hspace{-2.5em} CC=\min \{100, \lfloor\frac{\beta}{2}(1+\frac{1}{\alpha})\times\frac{100}{2}\rfloor\}\nonumber \\ 
 &&\hspace{-2.5em} RC=\min \{100, \lfloor(\max \{0,(1.0-\frac{\beta}{3})\}+\frac{\alpha}{2})\times\frac{100}{2}\rfloor\} \nonumber \\
@@ -102,7 +102,7 @@ high$\beta$波 & 18～29.75 & 警戒，動揺 \\
 \end{eqnarray}
 \vspace{-1mm}
 この式はEI，FAA，SampEnと比較すると，より高い精度で脳状態の推定が行うことができる．平成30年の研究の課題として他のパラメータを加えたり，重みの値の調整によって更に推定の精度を向上が臨めると記述されていた．
-そのため，本研究では各メンタル状態をこの計算式のパラメータを調整したccrcsc\_optimizeを提案する．以下がパラメータ改善式である．
+そのため，本研究では各メンタル状態をこの計算式のパラメータを調整したCRS.1を提案する．以下が改良推定式である．
 \begin{eqnarray}
 &&\hspace{-2.5em} CC=\min \{100， \lfloor\frac{\beta}{2}(1+\frac{1}{\alpha+1.2})\times{60}\rfloor\}\nonumber \\ 
 &&\hspace{-2.5em} RC=\min \{100， \lfloor(\max \{0，(1.0-\frac{\beta}{3})\}+\frac{\alpha}{1.5})\times{60}\rfloor\}  \nonumber \\
