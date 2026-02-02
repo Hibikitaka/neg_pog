@@ -105,7 +105,7 @@ delta_table.plot(kind="bar", figsize=(10, 5))
 
 plt.ylabel("Δ Value（測定時の値 − 平常時の値）")
 plt.legend(
-    title="手法",
+    title="式",
     bbox_to_anchor=(1.02, 1),
     loc="upper left"
 )
